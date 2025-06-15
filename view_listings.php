@@ -30,7 +30,7 @@ $listings = $stmt->fetchAll(PDO::FETCH_ASSOC);
           <div class="listing-card">
             <h3><?= htmlspecialchars($house['title']) ?></h3>
             <p>Location: <?= htmlspecialchars($house['location']) ?></p>
-            <p>Price: $<?= number_format($house['price'], 2) ?></p>
+            <p>Price: <strong>Rs <?= number_format($house['price'], 2) ?></strong> / month</p>
             <img src="images/<?= htmlspecialchars($house['image']) ?>" alt="<?= htmlspecialchars($house['title']) ?>" style="width: 100%; height: auto;">
             <a href="edit_listing.php?id=<?= $house['id'] ?>">Edit</a>
             <a href="delete_listing.php?id=<?= $house['id'] ?>" onclick="return confirm('Are you sure you want to delete this listing?');">Delete</a>

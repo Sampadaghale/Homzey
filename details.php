@@ -110,7 +110,7 @@ if (isset($_GET["id"]) && is_numeric($_GET["id"])) {
                     <img src="images/<?php echo htmlspecialchars($row["image"]); ?>" alt="<?php echo htmlspecialchars($row["title"]); ?>" />
                     <p><strong>Description:</strong> <?php echo nl2br(htmlspecialchars($row["description"])); ?></p>
                     <p><strong>Location:</strong> <?php echo htmlspecialchars($row["location"]); ?></p>
-                    <p><strong>Price:</strong> $<?php echo htmlspecialchars($row["price"]); ?> / month</p>
+                    <p><strong>Price:</strong> Rs<?php echo htmlspecialchars($row["price"]); ?> / month</p>
 
                     <a href="booking.php?id=<?php echo $row["id"]; ?>" class="btn-primary">Rent Now</a>
                     <a href="browse.php" class="btn-secondary">Back to Browse</a>

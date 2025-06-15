@@ -85,6 +85,7 @@ if ($result) {
   font-size: 1rem;
   border: 1px solid #ccc;
   border-radius: 0.5rem;
+  margin-left: 5rem;
 }
 
 .search-form button {
@@ -96,7 +97,8 @@ if ($result) {
   border-radius: 0.5rem;
   cursor: pointer;
   white-space: nowrap;
-  margin-top: -40px;
+  margin-top: -45px;
+  margin-right: 5rem;
 }
 .property-card img,
 .property-image {
@@ -182,7 +184,7 @@ if ($result) {
     <div class="property-info">
         <h3 class="property-title"><?= htmlspecialchars($house['title']); ?></h3>
         <p class="property-location"><?= htmlspecialchars($house['location']); ?></p>
-        <p class="property-price">$<?= htmlspecialchars($house['price']); ?> / month</p>
+        <p class="property-price">Rs<?= htmlspecialchars($house['price']); ?> / month</p>
         <a href="details.php?id=<?= $house['id']; ?>" class="btn btn-primary" aria-label="View details of <?= htmlspecialchars($house['title']); ?>">View Details</a>
     </div>
 </article>

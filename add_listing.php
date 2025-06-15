@@ -3,7 +3,7 @@ session_start();
 require 'db.php'; // This should now provide $conn (mysqli connection)
 
 if (!isset($_SESSION["user_id"]) || $_SESSION["user_role"] !== "landlord") {
-    header("Location: ../login.php");
+    header("Location: login.php");
     exit();
 }
 
@@ -83,7 +83,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <body>
     <nav>
         <a href="landlord_dashboard.php">Dashboard</a> | 
-        <a href="../logout.php">Logout</a>
+        <a href="logout.php">Logout</a>
     </nav>
     <h1>Add New House Listing</h1>
 
@@ -103,7 +103,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <label for="location">Location<span style="color:red;">*</span></label>
         <input id="location" name="location" required />
 
-        <label for="price">Price (per month)<span style="color:red;">*</span></label>
+        <label for="price">Price (Rs per month)<span style="color:red;">*</span></label>
         <input id="price" name="price" type="number" step="0.01" min="0" required />
 
         <label for="image">House Image (JPG, PNG, WEBP)</label>
