@@ -33,7 +33,12 @@ if (isset($_GET["id"])) {
         $price       = floatval($_POST["price"]);
         $imageName   = $house["image"]; // Keep existing image by default
 
-        if (!empty($_FILES["image"]["name"]) && $_FILES["image"]["error"] === UPLOAD_ERR_OK) {
+        // Validate required fields
+        if (empty($title) || empty($location) || $price <= 0) {
+            $errorMessage = "Please fill all required fields with valid data.";
+        }
+
+        if (empty($errorMessage) && !empty($_FILES["image"]["name"]) && $_FILES["image"]["error"] === UPLOAD_ERR_OK) {
             $allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
             $mimeType = mime_content_type($_FILES["image"]["tmp_name"]);
 
@@ -48,6 +53,13 @@ if (isset($_GET["id"])) {
                 }
 
                 if (move_uploaded_file($_FILES["image"]["tmp_name"], $targetFile)) {
+                    // Delete old image file if different and exists
+                    if ($imageName && $imageName !== $safeName) {
+                        $oldImagePath = $targetDir . $imageName;
+                        if (file_exists($oldImagePath)) {
+                            unlink($oldImagePath);
+                        }
+                    }
                     $imageName = $safeName;
                 } else {
                     $errorMessage = "Failed to move uploaded file.";
@@ -59,15 +71,13 @@ if (isset($_GET["id"])) {
 
         if (empty($errorMessage)) {
             $stmt = mysqli_prepare($conn, "UPDATE houses SET title = ?, description = ?, location = ?, price = ?, image = ? WHERE id = ?");
-            mysqli_stmt_bind_param($stmt, "sssdsii", $title, $description, $location, $price, $imageName, $house_id);
-            // Correction: 'i' instead of 'ii' for the last param (one int)
-            // So types should be "sssdsi" not "sssdsii"
-            mysqli_stmt_bind_param($stmt, "sssdsi", $title, $description, $location, $price, $imageName, $house_id);
+            mysqli_stmt_bind_param($stmt, "ssdssi", $title, $description, $location, $price, $imageName, $house_id);
 
             $success = mysqli_stmt_execute($stmt);
             mysqli_stmt_close($stmt);
 
             if ($success) {
+                // Redirect to dashboard or show success message
                 header("Location: landlord_dashboard.php?success=1");
                 exit();
             } else {
@@ -83,9 +93,9 @@ if (isset($_GET["id"])) {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Edit Listing</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <section class="auth-section" aria-label="Edit listing form">
@@ -101,21 +111,56 @@ if (isset($_GET["id"])) {
 
         <form method="post" action="" enctype="multipart/form-data">
           <label for="title">Title</label>
-          <input type="text" id="title" name="title" value="<?= htmlspecialchars($house['title']) ?>" required>
+          <input
+            type="text"
+            id="title"
+            name="title"
+            value="<?= htmlspecialchars($house['title']) ?>"
+            required
+          />
 
           <label for="description">Description</label>
-          <textarea id="description" name="description" rows="4" style="padding: 0.75rem; border-radius: 0.5rem;"><?= htmlspecialchars($house['description']) ?></textarea>
+          <textarea
+            id="description"
+            name="description"
+            rows="4"
+            style="padding: 0.75rem; border-radius: 0.5rem;"
+          ><?= htmlspecialchars($house['description']) ?></textarea>
 
           <label for="location">Location</label>
-          <input type="text" id="location" name="location" value="<?= htmlspecialchars($house['location']) ?>" required>
+          <input
+            type="text"
+            id="location"
+            name="location"
+            value="<?= htmlspecialchars($house['location']) ?>"
+            required
+          />
 
           <label for="price">Price</label>
-          <input type="number" id="price" name="price" step="0.01" value="<?= htmlspecialchars($house['price']) ?>" required>
+          <input
+            type="number"
+            id="price"
+            name="price"
+            step="0.01"
+            value="<?= htmlspecialchars($house['price']) ?>"
+            required
+          />
 
           <label for="image">Upload New Image (optional)</label>
-          <input type="file" id="image" name="image" accept="image/*">
+          <input type="file" id="image" name="image" accept="image/*" />
 
-          <button type="submit">Update Listing</button>
+          <?php if ($house['image']): ?>
+            <div style="margin-top: 1rem;">
+              <p>Current Image:</p>
+              <img
+                src="images/<?= htmlspecialchars($house['image']) ?>"
+                alt="Current house image"
+                style="max-width: 200px; border-radius: 0.5rem;"
+              />
+            </div>
+          <?php endif; ?>
+
+          <button type="submit" style="margin-top: 1rem;">Update Listing</button>
         </form>
       </section>
     </div>

@@ -1,4 +1,4 @@
-<?php
+<?php  
 session_start();
 require 'db.php'; // $conn = mysqli connection
 
@@ -10,20 +10,19 @@ if (isset($_GET['search'])) {
 
 // Prepare SQL with search filter if any
 if ($search !== '') {
-    // Search by title, location or price (price as number, so we search only if numeric)
+    // If numeric, add price filter in SQL
     $priceFilter = is_numeric($search) ? " OR price = " . floatval($search) : "";
-    $sql = "SELECT * FROM houses WHERE status = 'available' AND (title LIKE ? OR location LIKE ? $priceFilter) ORDER BY created_at DESC";
+    $sql = "SELECT * FROM houses WHERE (title LIKE ? OR location LIKE ? $priceFilter) ORDER BY created_at DESC";
     $stmt = $conn->prepare($sql);
     $likeSearch = "%$search%";
     $stmt->bind_param("ss", $likeSearch, $likeSearch);
     $stmt->execute();
     $result = $stmt->get_result();
 } else {
-    $sql = "SELECT * FROM houses WHERE status = 'available' ORDER BY created_at DESC";
+    $sql = "SELECT * FROM houses ORDER BY created_at DESC";
     $result = $conn->query($sql);
 }
 
-// Fetch all houses
 $houses = [];
 if ($result) {
     while ($row = $result->fetch_assoc()) {
@@ -42,94 +41,39 @@ if ($result) {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Browse Rentals - Homzey</title>
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="browse.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-     <style>
-* {
-                    margin: 0;
-                    padding: 0;
-                    box-sizing: border-box;
-                }
-                
-                body {
-                    margin: 0;
-                    padding: 0;
-                    font-family: Arial, sans-serif;
-                    background-color: #fff;
-                }
-                header {
-                    margin-bottom: 0;
-                    padding-bottom: 0;
-                }
-
-                main {
-                    margin-top: 0;
-                    padding-top: 0;
-                }
-
-                h2 {
-                    margin-top: 0;
-                    padding-top: 0;
-                    margin-bottom: 1rem;
-                }
-                .search-form {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: nowrap;
-  max-width: 500px;
-}
-
-.search-form input[type="text"] {
-  flex: 1;
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 0.5rem;
-  margin-left: 5rem;
-}
-
-.search-form button {
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
-  background-color: #92400e;
-  color: #fff;
-  border: none;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  white-space: nowrap;
-  margin-top: -45px;
-  margin-right: 5rem;
-}
-.property-card img,
-.property-image {
-  width: 100%;
-  height: 220px; /* Adjust to your preferred height */
-  object-fit: cover;
-  border-radius: 0.5rem;
-}
-.browse-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
-  padding: 1rem;
-}
-
-.property-card {
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 0.75rem;
-  overflow: hidden;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  transition: transform 0.3s ease;
-}
-.property-card .btn {
-  display: inline-block;
-  margin-top: 0.5rem; /* adjust the spacing as you like */
-  margin-bottom: 1rem;
-}
-
-  
-            </style>
+    <style>
+      /* Badge for booked properties */
+      .badge-booked {
+        background-color: #ef4444; /* Red */
+        color: white;
+        padding: 4px 8px;
+        border-radius: 5px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 2;
+      }
+      /* Positioning relative for card to place badge */
+      .property-card {
+        position: relative;
+      }
+      /* Disabled button styling */
+      .btn-disabled {
+        background-color: #999;
+        cursor: not-allowed;
+        pointer-events: none;
+        color: #eee;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        text-align: center;
+        display: inline-block;
+      }
+    </style>
 </head>
 <body>
 
@@ -179,15 +123,22 @@ if ($result) {
         <?php if (count($houses) > 0): ?>
             <div class="browse-grid" role="list">
                 <?php foreach ($houses as $house): ?>
-                    <article class="property-card" role="listitem" tabindex="0" aria-label="<?= htmlspecialchars($house['title']) . ' in ' . htmlspecialchars($house['location']) . ' for $' . htmlspecialchars($house['price']) . ' per month'; ?>">
-    <img class="property-image" src="images/<?= htmlspecialchars($house['image']); ?>" alt="<?= htmlspecialchars($house['title']); ?>" />
-    <div class="property-info">
-        <h3 class="property-title"><?= htmlspecialchars($house['title']); ?></h3>
-        <p class="property-location"><?= htmlspecialchars($house['location']); ?></p>
-        <p class="property-price">Rs<?= htmlspecialchars($house['price']); ?> / month</p>
-        <a href="details.php?id=<?= $house['id']; ?>" class="btn btn-primary" aria-label="View details of <?= htmlspecialchars($house['title']); ?>">View Details</a>
-    </div>
-</article>
+                    <article class="property-card" role="listitem" tabindex="0" aria-label="<?= htmlspecialchars($house['title']) . ' in ' . htmlspecialchars($house['location']) . ' for Rs' . htmlspecialchars($house['price']) . ' per month'; ?>">
+                        <?php if ($house['status'] === 'booked'): ?>
+                            <span class="badge-booked" aria-label="This property is booked">Booked</span>
+                        <?php endif; ?>
+                        <img class="property-image" src="images/<?= htmlspecialchars($house['image']); ?>" alt="<?= htmlspecialchars($house['title']); ?>" />
+                        <div class="property-info">
+                            <h3 class="property-title"><?= htmlspecialchars($house['title']); ?></h3>
+                            <p class="property-location"><?= htmlspecialchars($house['location']); ?></p>
+                            <p class="property-price">Rs<?= htmlspecialchars($house['price']); ?> / month</p>
+                            <?php if ($house['status'] === 'booked'): ?>
+                                <button class="btn-disabled" aria-disabled="true">Booked</button>
+                            <?php else: ?>
+                                <a href="details.php?id=<?= $house['id']; ?>" class="btn btn-primary" aria-label="View details of <?= htmlspecialchars($house['title']); ?>">View Details</a>
+                            <?php endif; ?>
+                        </div>
+                    </article>
                 <?php endforeach; ?>
             </div>
         <?php else: ?>
@@ -197,7 +148,7 @@ if ($result) {
 </main>
 
 <footer>
-    &copy; 2024 HouseRent. All rights reserved.
+    &copy; 2025 Homzey. All rights reserved.
 </footer>
 
 <script>

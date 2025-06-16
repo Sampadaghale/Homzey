@@ -1,6 +1,7 @@
-<?php  
+<?php   
 session_start();
 include 'db.php';
+
 
 // Check if tenant is logged in
 if (!isset($_SESSION["user_id"]) || $_SESSION["user_role"] != "tenant") {
@@ -98,6 +99,13 @@ if (isset($_GET["id"]) && is_numeric($_GET["id"])) {
                 .btn-primary:hover, .btn-secondary:hover {
                     background-color: #0056b3;
                 }
+
+                /* Disabled button style */
+                .btn-disabled {
+                    background-color: #999 !important;
+                    cursor: not-allowed;
+                    color: #eee !important;
+                }
             </style>
         </head>
         <body>
@@ -112,10 +120,16 @@ if (isset($_GET["id"]) && is_numeric($_GET["id"])) {
                     <p><strong>Location:</strong> <?php echo htmlspecialchars($row["location"]); ?></p>
                     <p><strong>Price:</strong> Rs<?php echo htmlspecialchars($row["price"]); ?> / month</p>
 
-                    <a href="booking.php?id=<?php echo $row["id"]; ?>" class="btn-primary">Rent Now</a>
+                    <?php if ($row["status"] === "booked"): ?>
+                        <button class="btn-primary btn-disabled" disabled>This property is already booked</button>
+                    <?php else: ?>
+                        <a href="booking.php?id=<?php echo $row["id"]; ?>" class="btn-primary">Rent Now</a>
+                    <?php endif; ?>
+
                     <a href="browse.php" class="btn-secondary">Back to Browse</a>
                 </div>
             </main>
+            <?php include 'review.php'; ?>
         </body>
         </html>
         <?php
@@ -127,4 +141,5 @@ if (isset($_GET["id"]) && is_numeric($_GET["id"])) {
 } else {
     echo "<p>Invalid request.</p>";
 }
+
 ?>

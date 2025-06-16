@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Prepare statement to fetch user by email and role
-    $sql = "SELECT id, name, password, role FROM users WHERE email = ? AND role = ?";
+    $sql = "SELECT id, name, email, password, role FROM users WHERE email = ? AND role = ?";
     $stmt = mysqli_prepare($conn, $sql);
     mysqli_stmt_bind_param($stmt, "ss", $email, $role);
     mysqli_stmt_execute($stmt);
@@ -25,6 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Set session variables
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['user_name'] = $user['name'];
+            $_SESSION['user_email'] = $user['email'];  // ✅ Email added to session
             $_SESSION['user_role'] = $user['role'];
 
             // Redirect based on role
@@ -55,7 +56,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     mysqli_stmt_close($stmt);
-
 } else {
     header('Location: /homzey/login.php');
     exit();

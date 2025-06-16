@@ -63,7 +63,7 @@ if ($result) {
                     </div>
                 </div>
             <?php else: ?>
-                <a href="login.php" tabindex="0" aria-label="Login page">Login</a>
+                <a href="login.php" style="color:black;" tabindex="0" aria-label="Login page">Login</a>
             <?php endif; ?>
         </div>
     </nav>
@@ -131,7 +131,8 @@ if ($result) {
                     <div class="property-info">
                         <h3 class="property-title"><?= htmlspecialchars($house['title']); ?></h3>
                         <p class="property-location"><?= htmlspecialchars($house['location']); ?></p>
-                        <p class="property-price">$<?= htmlspecialchars($house['price']); ?> / month</p>
+                        <p class="property-price">Rs<?= htmlspecialchars($house['price']); ?> / month</p>
+                        <a href="details.php?id=<?= $house['id']; ?>" class="btn btn-primary" aria-label="View details of <?= htmlspecialchars($house['title']); ?>">View Details</a>
                     </div>
                 </article>
             <?php endforeach; ?>
@@ -142,10 +143,13 @@ if ($result) {
         <div class="container about-content">
             <div class="about-text">
                 <h2 id="about-title">About Us</h2>
+                 <p>
+            At HouseRent, we are committed to connecting renters with their dream homes through an easy-to-use, trustworthy platform. Our team carefully vets each listing for quality and authenticity to ensure you find a perfect place to call home effortlessly.
+          </p>
                 <p>We provide quality rental houses that suit your lifestyle and budget. Explore your next home with us.</p>
             </div>
             <div class="about-image">
-                <img src="images/about-house.jpg" alt="About House" />
+                <img src="image/house 1.png" alt="About House" />
             </div>
         </div>
     </section>
@@ -201,7 +205,7 @@ if ($result) {
 </main>
 
 <footer>
-    &copy; 2024 HouseRent. All rights reserved.
+    &copy; 2025 Homzey. All rights reserved.
 </footer>
 
 </body>

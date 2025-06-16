@@ -50,6 +50,7 @@ mysqli_stmt_close($stmt);
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+   <link rel="stylesheet" href="styles.css" />
   <title>Landlord Dashboard</title>
   <style>
     body {
@@ -70,8 +71,8 @@ mysqli_stmt_close($stmt);
       align-items: center;
     }
     .logo img {
-      height: 50px;
-      margin-right: 30px;
+       width: 60px;
+  height: auto;
     }
     nav a {
       color: black;
@@ -115,7 +116,7 @@ mysqli_stmt_close($stmt);
       border-radius: 4px;
     }
     .btn {
-      background: #28a745;
+      background: #4CAF50;
       color: white;
       text-decoration: none;
       padding: 6px 12px;
@@ -131,7 +132,7 @@ mysqli_stmt_close($stmt);
 
 <header>
   <div class="logo">
-    <img src="image/house.png" alt="Logo"> <!-- Replace with your actual logo path -->
+    <img src="image/house.png" alt="Logo"> 
     
   </div>
   <nav>
@@ -158,10 +159,10 @@ mysqli_stmt_close($stmt);
       <?php if (count($houses) > 0): ?>
         <?php foreach ($houses as $house): ?>
           <tr>
-            <td><img src="../<?= htmlspecialchars($house['image']); ?>" alt="<?= htmlspecialchars($house['title']); ?>" class="house-img"></td>
+            <td><img src="images/<?= htmlspecialchars($house['image']); ?>" alt="<?= htmlspecialchars($house['title']); ?>" class="house-img"></td>
             <td><?= htmlspecialchars($house['title']); ?></td>
             <td><?= htmlspecialchars($house['location']); ?></td>
-            <td>$<?= htmlspecialchars($house['price']); ?></td>
+            <td>Rs<?= htmlspecialchars($house['price']); ?></td>
             <td>
               <a href="edit_listing.php?id=<?= $house['id']; ?>" class="btn">Edit</a>
               <a href="delete_listing.php?id=<?= $house['id']; ?>" class="btn delete" onclick="return confirm('Are you sure to delete this listing?');">Delete</a>
@@ -200,7 +201,7 @@ mysqli_stmt_close($stmt);
             <td><?= htmlspecialchars($booking['booking_date']); ?></td>
             <td><?= htmlspecialchars($booking['start_date']); ?></td>
             <td><?= htmlspecialchars($booking['end_date']); ?></td>
-            <td>$<?= htmlspecialchars($booking['total_price']); ?></td>
+            <td>Rs<?= htmlspecialchars($booking['total_price']); ?></td>
             <td><?= htmlspecialchars(ucfirst($booking['status'])); ?></td>
           </tr>
         <?php endforeach; ?>

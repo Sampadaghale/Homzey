@@ -11,9 +11,12 @@
     <h2>Access Your Account</h2>
     <div class="auth-forms">
       <section class="auth-card" aria-labelledby="login-title">
-        <h3 id="login-title" style="color:#92400e; font-weight:800; font-size:1.75rem; margin-bottom:1rem;">
-          Login
-        </h3>
+
+  <!-- Logo Image -->
+  <div class="logo-container">
+    <img src="image/house.png" alt="Homzey Logo" class="auth-logo">
+  </div>
+
         <form action="login_process.php" method="post" novalidate aria-label="Login form">
           <label for="homepage-login-email">Email</label>
           <input
