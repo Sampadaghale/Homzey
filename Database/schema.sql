@@ -33,3 +33,14 @@ CREATE TABLE bookings (
     FOREIGN KEY (tenant_id) REFERENCES users(id),
     FOREIGN KEY (house_id) REFERENCES houses(id)
 );
+CREATE TABLE reviews (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    house_id INT NOT NULL,
+    tenant_id INT NOT NULL,
+    rating INT NOT NULL CHECK (rating BETWEEN 1 AND 5),
+    comment TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (house_id) REFERENCES houses(id) ON DELETE CASCADE,
+    FOREIGN KEY (tenant_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
