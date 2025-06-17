@@ -146,7 +146,7 @@ header {
 }
 
 .user-dropdown a:hover {
-  color: #ef4444;
+  color: #111827;
 }
 
 .user-dropdown-container:hover .user-dropdown {
@@ -322,7 +322,7 @@ header {
       user-select: none;
 }
 
-.feature-title:{
+.feature-title{
  font-weight: 700;
       font-size: 1.25rem;
       color: #b45309;
@@ -794,6 +794,10 @@ body {
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
   padding: 1rem;
+}
+
+.browse h1{
+  text-align: center;
 }
 
 /* Property Card */

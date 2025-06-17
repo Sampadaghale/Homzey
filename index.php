@@ -80,7 +80,7 @@ if ($result) {
         <div class="container hero-content">
             <h1>Find Your Perfect Home To Rent</h1>
             <p>Discover verified rental houses with ease. From cozy apartments to spacious homes — your dream rental is just a click away.</p>
-            <button class="btn-primary" type="button" aria-label="Browse house rentals" onclick="location.href='details.php'">
+            <button class="btn-primary" type="button" aria-label="Browse house rentals" onclick="location.href='Browse.php'">
                 Browse Rentals
             </button>
         </div>

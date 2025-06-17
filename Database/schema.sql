@@ -31,7 +31,10 @@ CREATE TABLE bookings (
     status ENUM('pending', 'confirmed', 'cancelled') DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (tenant_id) REFERENCES users(id),
-    FOREIGN KEY (house_id) REFERENCES houses(id)
+    FOREIGN KEY (house_id) REFERENCES houses(id),
+    name VARCHAR(255) NOT NULL,
+    address VARCHAR(255) NOT NULL,
+    phone VHARCHAR(20) NOT NULL
 );
 CREATE TABLE reviews (
     id INT AUTO_INCREMENT PRIMARY KEY,

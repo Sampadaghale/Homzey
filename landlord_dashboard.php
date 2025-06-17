@@ -1,4 +1,4 @@
-<?php  
+<?php   
 session_start();
 include 'db.php'; // expects $conn = mysqli_connect(...)
 
@@ -28,9 +28,9 @@ $result = mysqli_stmt_get_result($stmt);
 $houses = mysqli_fetch_all($result, MYSQLI_ASSOC);
 mysqli_stmt_close($stmt);
 
-// Fetch bookings for landlord's houses
+// Fetch bookings for landlord's houses (added house_id for link)
 $sql = "
-SELECT b.*, h.title AS house_title, u.name AS tenant_name, u.email AS tenant_email 
+SELECT b.*, h.title AS house_title, h.id AS house_id, u.name AS tenant_name, u.email AS tenant_email 
 FROM bookings b
 JOIN houses h ON b.house_id = h.id
 JOIN users u ON b.tenant_id = u.id
@@ -50,7 +50,7 @@ mysqli_stmt_close($stmt);
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css" />
   <title>Landlord Dashboard</title>
   <style>
     body {
@@ -71,8 +71,8 @@ mysqli_stmt_close($stmt);
       align-items: center;
     }
     .logo img {
-       width: 60px;
-  height: auto;
+      width: 60px;
+      height: auto;
     }
     nav a {
       color: black;
@@ -126,6 +126,15 @@ mysqli_stmt_close($stmt);
     .btn.delete {
       background: #dc3545;
     }
+    /* New status colors */
+    .status-confirmed {
+      color: green;
+      font-weight: bold;
+    }
+    .status-cancelled {
+      color: red;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -133,7 +142,6 @@ mysqli_stmt_close($stmt);
 <header>
   <div class="logo">
     <img src="image/house.png" alt="Logo"> 
-    
   </div>
   <nav>
     <a href="add_listing.php">Add Listing</a>
@@ -195,14 +203,20 @@ mysqli_stmt_close($stmt);
       <?php if (count($bookings) > 0): ?>
         <?php foreach ($bookings as $booking): ?>
           <tr>
-            <td><?= htmlspecialchars($booking['house_title']); ?></td>
+            <td>
+              <a href="house_detail.php?id=<?= $booking['house_id']; ?>" target="_blank">
+                <?= htmlspecialchars($booking['house_title']); ?>
+              </a>
+            </td>
             <td><?= htmlspecialchars($booking['tenant_name']); ?></td>
             <td><?= htmlspecialchars($booking['tenant_email']); ?></td>
             <td><?= htmlspecialchars($booking['booking_date']); ?></td>
             <td><?= htmlspecialchars($booking['start_date']); ?></td>
             <td><?= htmlspecialchars($booking['end_date']); ?></td>
             <td>Rs<?= htmlspecialchars($booking['total_price']); ?></td>
-            <td><?= htmlspecialchars(ucfirst($booking['status'])); ?></td>
+            <td class="status-<?= strtolower(htmlspecialchars($booking['status'])); ?>">
+              <?= htmlspecialchars(ucfirst($booking['status'])); ?>
+            </td>
           </tr>
         <?php endforeach; ?>
       <?php else: ?>

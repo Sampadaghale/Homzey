@@ -1,8 +1,8 @@
-<?php  
+<?php   
 session_start();
 include 'db.php';
 
-// Enable error reporting for debugging (remove on production)
+// Enable error reporting for debugging
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -47,25 +47,24 @@ $search = $_GET['search'] ?? '';
             <a href="index.php">Home</a>
             <a href="browse.php">Browse</a>
             <?php if (isset($_SESSION['user_name'])): ?>
-                <div class="user-dropdown-container" aria-haspopup="true" aria-expanded="false">
-                    <button class="user-toggle" onclick="toggleDropdown()" aria-label="User menu">
+                <div class="user-dropdown-container">
+                    <button class="user-toggle" onclick="toggleDropdown()">
                         <span><?= htmlspecialchars($_SESSION['user_name']); ?></span>
                         <i class="fa fa-caret-down" aria-hidden="true"></i>
                     </button>
-                    <div id="userDropdown" class="user-dropdown hidden" role="menu" aria-label="User Menu">
-                        <strong class="user-name" role="presentation"><?= htmlspecialchars($_SESSION['user_name']); ?></strong>
-                        <?php if ($_SESSION['user_role'] === 'tenant'): ?>
-                            <a href="tenant_dashboard.php" class="account-button booking-btn" role="menuitem">My Bookings</a>
-                        <?php endif; ?>
-                        <a href="logout.php" class="account-button logout-btn" role="menuitem">Logout</a>
+                    <div id="userDropdown" class="user-dropdown hidden">
+                        <strong class="user-name"><?= htmlspecialchars($_SESSION['user_name']); ?></strong>
+                        <a href="tenant_dashboard.php" class="account-button booking-btn">My Bookings</a>
+                        <a href="logout.php" class="account-button logout-btn">Logout</a>
                     </div>
                 </div>
             <?php else: ?>
-                <a href="login.php" tabindex="0" aria-label="Login page">Login</a>
+                <a href="login.php">Login</a>
             <?php endif; ?>
         </div>
     </nav>
 </header>
+
 <div class="booking-container">
 <?php
 if ($house_id <= 0) {
@@ -76,6 +75,9 @@ if ($house_id <= 0) {
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $start_date = $_POST['start_date'] ?? '';
     $end_date = $_POST['end_date'] ?? '';
+    $full_name = $_POST['full_name'] ?? '';
+    $address = $_POST['address'] ?? '';
+    $phone = $_POST['phone'] ?? '';
 
     if (!$start_date || !$end_date || strtotime($end_date) <= strtotime($start_date)) {
         echo "<p>Invalid dates.</p>";
@@ -99,9 +101,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $total_price = $days * floatval($house['price']);
     $commission = $total_price * 0.1;
 
-    // Insert booking
-    $stmt = mysqli_prepare($conn, "INSERT INTO bookings (tenant_id, house_id, booking_date, start_date, end_date, total_price, commission, status) VALUES (?, ?, CURDATE(), ?, ?, ?, ?, 'confirmed')");
-    mysqli_stmt_bind_param($stmt, "iissdd", $tenant_id, $house_id, $start_date, $end_date, $total_price, $commission);
+    // Insert booking with additional fields
+    $stmt = mysqli_prepare($conn, "INSERT INTO bookings (tenant_id, house_id, booking_date, start_date, end_date, total_price, commission, name, address, phone, status) VALUES (?, ?, CURDATE(), ?, ?, ?, ?, ?, ?, ?, 'confirmed')");
+    mysqli_stmt_bind_param($stmt, "iissddsss", $tenant_id, $house_id, $start_date, $end_date, $total_price, $commission, $full_name, $address, $phone);
     $exec_success = mysqli_stmt_execute($stmt);
     mysqli_stmt_close($stmt);
 
@@ -112,14 +114,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         mysqli_stmt_execute($stmt2);
         mysqli_stmt_close($stmt2);
 
-        // Fetch tenant info
-        $stmt4 = mysqli_prepare($conn, "SELECT name, email, phone FROM users WHERE id = ?");
-        mysqli_stmt_bind_param($stmt4, "i", $tenant_id);
-        mysqli_stmt_execute($stmt4);
-        $tenant_result = mysqli_stmt_get_result($stmt4);
-        $tenant_full = mysqli_fetch_assoc($tenant_result);
-        mysqli_stmt_close($stmt4);
-
         // Fetch landlord info
         $stmt3 = mysqli_prepare($conn, "SELECT name, email, phone FROM users WHERE id = ?");
         mysqli_stmt_bind_param($stmt3, "i", $house['landlord_id']);
@@ -129,7 +123,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         mysqli_stmt_close($stmt3);
 
         // Send Emails
-        if ($tenant_full['email'] && $landlord['email']) {
+        if ($tenant_email && $landlord['email']) {
             $mail = new PHPMailer(true);
             try {
                 $mail->isSMTP();
@@ -142,19 +136,24 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $mail->setFrom('homzeyrent@gmail.com', 'Homzey');
 
                 // Email to tenant
-                $mail->addAddress($tenant_full['email'], $tenant_full['name']);
+                $mail->addAddress($tenant_email, $full_name);
                 $mail->Subject = "Booking Confirmed - {$house['title']}";
                 $mail->Body =
-                    "Hello {$tenant_full['name']},\n\n" .
+                    "Hello $full_name,\n\n" .
                     "Your booking for '{$house['title']}' is confirmed.\n\n" .
                     "Landlord Contact Info:\n" .
                     "Name: {$landlord['name']}\n" .
                     "Email: {$landlord['email']}\n" .
                     "Phone: {$landlord['phone']}\n\n" .
-                    "Booking Details:\n" .
+                    "Booking Info:\n" .
                     "Start Date: $start_date\n" .
                     "End Date: $end_date\n" .
-                    "Total Price: Rs. $total_price";
+                    "Total Price: Rs. $total_price\n\n" .
+                    "Your Details:\n" .
+                    "Name: $full_name\n" .
+                    "Address: $address\n" .
+                    "Phone: $phone";
+
                 $mail->send();
 
                 // Email to landlord
@@ -164,14 +163,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $mail->Body =
                     "Hello {$landlord['name']},\n\n" .
                     "Your house '{$house['title']}' has been booked.\n\n" .
-                    "Tenant Contact Info:\n" .
-                    "Name: {$tenant_full['name']}\n" .
-                    "Email: {$tenant_full['email']}\n" .
-                    "Phone: {$tenant_full['phone']}\n\n" .
+                    "Tenant Info:\n" .
+                    "Name: $full_name\n" .
+                    "Address: $address\n" .
+                    "Phone: $phone\n\n" .
                     "Booking Details:\n" .
                     "Start Date: $start_date\n" .
                     "End Date: $end_date\n" .
                     "Total Price: Rs. $total_price";
+
                 $mail->send();
 
                 echo "<p>Booking successful! Emails sent.</p>";
@@ -195,6 +195,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if ($house) {
         echo "<h2>Book: " . htmlspecialchars($house["title"]) . "</h2>";
         echo '<form method="post">
+                <label>Full Name: <input type="text" name="full_name" required></label>
+                <label>Address: <input type="text" name="address" required></label>
+                <label>Phone Number: <input type="text" name="phone" required></label>
                 <label>Start Date: <input type="date" name="start_date" required></label>
                 <label>End Date: <input type="date" name="end_date" required></label>
                 <button type="submit">Confirm Booking</button>
