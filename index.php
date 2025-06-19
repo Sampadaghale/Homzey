@@ -86,6 +86,23 @@ if ($result) {
         </div>
     </section>
 
+    <section class="browse" aria-labelledby="browse-title" id="browse">
+        <h2 id="browse-title">Browse Our Rentals</h2>
+        <div class="browse-grid" role="list">
+            <?php foreach ($houses as $house): ?>
+                <article class="property-card" role="listitem" tabindex="0" aria-label="<?= htmlspecialchars($house['title']) . ' in ' . htmlspecialchars($house['location']) . ' for $' . htmlspecialchars($house['price']) . ' per month'; ?>">
+                   <img class="property-image" src="images/<?= htmlspecialchars($house['image']); ?>" alt="<?= htmlspecialchars($house['title']); ?>" />
+                    <div class="property-info">
+                        <h3 class="property-title"><?= htmlspecialchars($house['title']); ?></h3>
+                        <p class="property-location"><?= htmlspecialchars($house['location']); ?></p>
+                        <p class="property-price">Rs<?= htmlspecialchars($house['price']); ?> / month</p>
+                        <a href="details.php?id=<?= $house['id']; ?>" class="btn btn-primary" aria-label="View details of <?= htmlspecialchars($house['title']); ?>">View Details</a>
+                    </div>
+                </article>
+            <?php endforeach; ?>
+        </div>
+    </section>
+
     <section class="features" aria-labelledby="features-title">
         <h2 id="features-title">Why Choose HouseRent?</h2>
         <div class="features-grid">
@@ -122,23 +139,6 @@ if ($result) {
         </div>
     </section>
 
-    <section class="browse" aria-labelledby="browse-title" id="browse">
-        <h2 id="browse-title">Browse Our Rentals</h2>
-        <div class="browse-grid" role="list">
-            <?php foreach ($houses as $house): ?>
-                <article class="property-card" role="listitem" tabindex="0" aria-label="<?= htmlspecialchars($house['title']) . ' in ' . htmlspecialchars($house['location']) . ' for $' . htmlspecialchars($house['price']) . ' per month'; ?>">
-                   <img class="property-image" src="images/<?= htmlspecialchars($house['image']); ?>" alt="<?= htmlspecialchars($house['title']); ?>" />
-                    <div class="property-info">
-                        <h3 class="property-title"><?= htmlspecialchars($house['title']); ?></h3>
-                        <p class="property-location"><?= htmlspecialchars($house['location']); ?></p>
-                        <p class="property-price">Rs<?= htmlspecialchars($house['price']); ?> / month</p>
-                        <a href="details.php?id=<?= $house['id']; ?>" class="btn btn-primary" aria-label="View details of <?= htmlspecialchars($house['title']); ?>">View Details</a>
-                    </div>
-                </article>
-            <?php endforeach; ?>
-        </div>
-    </section>
-
     <section class="about" id="about" aria-labelledby="about-title">
         <div class="container about-content">
             <div class="about-text">
@@ -154,23 +154,30 @@ if ($result) {
         </div>
     </section>
 
-    <section class="contact" id="contact" aria-labelledby="contact-title">
-        <div class="container contact-content">
-            <h2 id="contact-title">Contact Us</h2>
-            <form action="/contact-submit" method="POST" class="contact-form">
-                <label for="name">Name</label>
-                <input type="text" id="name" name="name" required />
-
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" required />
-
-                <label for="message">Message</label>
-                <textarea id="message" name="message" required></textarea>
-
-                <button type="submit" class="btn-primary">Send Message</button>
-            </form>
+    <section class="contact" id="contact">
+        <div class="section__container contact__container">
+          <div class="contact__col">
+            <h4>Contact a travel researcher</h4>
+            <p>We always aim to reply within 24 hours.</p>
+          </div>  
+          <div class="contact__col">
+            <div class="contact__card">
+                <span>
+                    <a href="#"><i class="ri-phone-line"></i></a></span>
+                <h4>call us</h4>
+                <h5>9742515636</h5>
+                <p>We are online now</p>
+            </div>
+          </div>
+          <div class="contact__col">
+            <div class="contact__card">
+                <span>
+                    <a href="#"><i class="ri-mail-line"></i></a></span>
+                <h4>Send us enquiry</h4>
+            </div>
+          </div>
         </div>
-    </section>
+     </section>
 
     <section class="how-it-works" aria-labelledby="how-title">
         <div class="container">

@@ -1,27 +1,18 @@
-<?php   
+<?php
 session_start();
 include 'db.php';
 
-
-// Check if tenant is logged in
-if (!isset($_SESSION["user_id"]) || $_SESSION["user_role"] != "tenant") {
-    header("Location: login.php");
-    exit();
-}
-
-// Validate the house ID from URL
 if (isset($_GET["id"]) && is_numeric($_GET["id"])) {
     $house_id = intval($_GET["id"]);
 
-    // Use prepared statement to prevent SQL injection
     $stmt = $conn->prepare("SELECT * FROM houses WHERE id = ?");
     $stmt->bind_param("i", $house_id);
     $stmt->execute();
     $result = $stmt->get_result();
 
-    // Check if house was found
     if ($result->num_rows === 1) {
         $row = $result->fetch_assoc();
+        $imageList = explode(',', $row["image"]);
         ?>
         <!DOCTYPE html>
         <html lang="en">
@@ -31,7 +22,6 @@ if (isset($_GET["id"]) && is_numeric($_GET["id"])) {
             <title>House Details</title>
             <link rel="stylesheet" href="styles.css" />
             <style>
-                /* Reset common browser spacing */
                 * {
                     margin: 0;
                     padding: 0;
@@ -39,20 +29,16 @@ if (isset($_GET["id"]) && is_numeric($_GET["id"])) {
                 }
 
                 body {
-                    margin: 0;
-                    padding: 0;
                     font-family: Arial, sans-serif;
                     background-color: #fff;
                 }
 
                 header {
                     margin-bottom: 0;
-                    padding-bottom: 0;
                 }
 
                 main {
                     margin-top: 0;
-                    padding-top: 0;
                 }
 
                 h2 {
@@ -69,12 +55,45 @@ if (isset($_GET["id"]) && is_numeric($_GET["id"])) {
                     background-color: #f9f9f9;
                 }
 
-                img {
-                    max-width: 100%;
-                    height: auto;
-                    display: block;
-                    margin-bottom: 1rem;
-                    border-radius: 5px;
+                .slider {
+                    position: relative;
+                    overflow: hidden;
+                    border-radius: 8px;
+                    height: 400px;
+                    margin-bottom: 10px;
+                }
+
+                .slider-images {
+                    display: flex;
+                    transition: transform 0.5s ease;
+                    height: 100%;
+                }
+
+                .slider-images img {
+                    width: 100%;
+                    flex-shrink: 0;
+                    object-fit: cover;
+                    height: 100%;
+                }
+
+                .slider-dots {
+                    text-align: center;
+                    margin-top: 10px;
+                }
+
+                .slider-dot {
+                    display: inline-block;
+                    width: 12px;
+                    height: 12px;
+                    margin: 0 5px;
+                    background-color: #ccc;
+                    border-radius: 50%;
+                    cursor: pointer;
+                    transition: background-color 0.3s ease;
+                }
+
+                .slider-dot.active {
+                    background-color: #3b82f6;
                 }
 
                 p {
@@ -83,7 +102,8 @@ if (isset($_GET["id"]) && is_numeric($_GET["id"])) {
                     color: #333;
                 }
 
-                .btn-primary, .btn-secondary {
+                .btn-primary,
+                .btn-secondary {
                     display: inline-block;
                     margin: 10px 10px 0 0;
                     padding: 10px 15px;
@@ -96,11 +116,11 @@ if (isset($_GET["id"]) && is_numeric($_GET["id"])) {
                     cursor: pointer;
                 }
 
-                .btn-primary:hover, .btn-secondary:hover {
+                .btn-primary:hover,
+                .btn-secondary:hover {
                     background-color: #0056b3;
                 }
 
-                /* Disabled button style */
                 .btn-disabled {
                     background-color: #999 !important;
                     cursor: not-allowed;
@@ -110,26 +130,60 @@ if (isset($_GET["id"]) && is_numeric($_GET["id"])) {
         </head>
         <body>
             <header>
-                <!-- You can add a header here if needed -->
+                <!-- Your site header if needed -->
             </header>
             <main>
                 <div class="container">
-                    <h2><?php echo htmlspecialchars($row["title"]); ?></h2>
-                    <img src="images/<?php echo htmlspecialchars($row["image"]); ?>" alt="<?php echo htmlspecialchars($row["title"]); ?>" />
-                    <p><strong>Description:</strong> <?php echo nl2br(htmlspecialchars($row["description"])); ?></p>
-                    <p><strong>Location:</strong> <?php echo htmlspecialchars($row["location"]); ?></p>
-                    <p><strong>Price:</strong> Rs<?php echo htmlspecialchars($row["price"]); ?> / month</p>
+                    <h2><?= htmlspecialchars($row["title"]) ?></h2>
+
+                    <!-- Image Slider -->
+                    <div class="slider">
+                        <div class="slider-images" id="sliderImages">
+                            <?php foreach ($imageList as $img): ?>
+                                <img src="images/<?= htmlspecialchars(trim($img)) ?>" alt="House Image">
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                    <div class="slider-dots" id="sliderDots">
+                        <?php foreach ($imageList as $i => $img): ?>
+                            <span class="slider-dot" onclick="goToSlide(<?= $i ?>)"></span>
+                        <?php endforeach; ?>
+                    </div>
+
+                    <p><strong>Description:</strong> <?= nl2br(htmlspecialchars($row["description"])) ?></p>
+                    <p><strong>Location:</strong> <?= htmlspecialchars($row["location"]) ?></p>
+                    <p><strong>Price:</strong> Rs<?= htmlspecialchars($row["price"]) ?> / month</p>
 
                     <?php if ($row["status"] === "booked"): ?>
                         <button class="btn-primary btn-disabled" disabled>This property is already booked</button>
                     <?php else: ?>
-                        <a href="booking.php?id=<?php echo $row["id"]; ?>" class="btn-primary">Rent Now</a>
+                        <a href="booking.php?id=<?= $row["id"] ?>" class="btn-primary">Rent Now</a>
                     <?php endif; ?>
-
                     <a href="browse.php" class="btn-secondary">Back to Browse</a>
                 </div>
             </main>
+
+            <!-- ✅ Restore your review section -->
             <?php include 'review.php'; ?>
+
+            <script>
+                const sliderImages = document.getElementById('sliderImages');
+                const dots = document.querySelectorAll('.slider-dot');
+                let currentSlide = 0;
+                const totalSlides = <?= count($imageList) ?>;
+
+                function goToSlide(index) {
+                    currentSlide = index;
+                    sliderImages.style.transform = `translateX(-${index * 100}%)`;
+                    dots.forEach((dot, i) => {
+                        dot.classList.toggle('active', i === index);
+                    });
+                }
+
+                if (dots.length > 0) {
+                    goToSlide(0);
+                }
+            </script>
         </body>
         </html>
         <?php
@@ -141,5 +195,4 @@ if (isset($_GET["id"]) && is_numeric($_GET["id"])) {
 } else {
     echo "<p>Invalid request.</p>";
 }
-
 ?>

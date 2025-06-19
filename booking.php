@@ -2,6 +2,12 @@
 session_start();
 include 'db.php';
 
+// Check if tenant is logged in
+if (!isset($_SESSION["user_id"]) || $_SESSION["user_role"] != "tenant") {
+    header("Location: login.php");
+    exit();
+}
+
 // Enable error reporting for debugging
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);

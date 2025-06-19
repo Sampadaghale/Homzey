@@ -1,4 +1,4 @@
-<?php   
+<?php    
 session_start();
 include 'db.php'; // expects $conn = mysqli_connect(...)
 
@@ -28,7 +28,7 @@ $result = mysqli_stmt_get_result($stmt);
 $houses = mysqli_fetch_all($result, MYSQLI_ASSOC);
 mysqli_stmt_close($stmt);
 
-// Fetch bookings for landlord's houses (added house_id for link)
+// Fetch bookings for landlord's houses
 $sql = "
 SELECT b.*, h.title AS house_title, h.id AS house_id, u.name AS tenant_name, u.email AS tenant_email 
 FROM bookings b
@@ -60,19 +60,13 @@ mysqli_stmt_close($stmt);
     }
     header {
       background: white;
-      color: white;
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 10px 20px;
     }
-    .logo {
-      display: flex;
-      align-items: center;
-    }
     .logo img {
       width: 60px;
-      height: auto;
     }
     nav a {
       color: black;
@@ -103,17 +97,44 @@ mysqli_stmt_close($stmt);
       border: 1px solid #ddd;
       padding: 10px;
       text-align: left;
-      vertical-align: middle;
     }
     th {
       background-color: #4CAF50;
       color: white;
     }
-    img.house-img {
-      max-width: 120px;
-      max-height: 90px;
-      object-fit: cover;
+    .slider {
+      position: relative;
+      width: 120px;
+      height: 90px;
+      overflow: hidden;
       border-radius: 4px;
+    }
+    .slider img {
+      width: 100%;
+      height: 90px;
+      object-fit: cover;
+      display: none;
+    }
+    .slider img.active {
+      display: block;
+    }
+    .dots {
+      text-align: center;
+      position: absolute;
+      bottom: 4px;
+      width: 100%;
+    }
+    .dot {
+      height: 8px;
+      width: 8px;
+      margin: 0 2px;
+      background-color: #bbb;
+      border-radius: 50%;
+      display: inline-block;
+      cursor: pointer;
+    }
+    .dot.active {
+      background-color: #717171;
     }
     .btn {
       background: #4CAF50;
@@ -126,7 +147,6 @@ mysqli_stmt_close($stmt);
     .btn.delete {
       background: #dc3545;
     }
-    /* New status colors */
     .status-confirmed {
       color: green;
       font-weight: bold;
@@ -156,7 +176,7 @@ mysqli_stmt_close($stmt);
   <table>
     <thead>
       <tr>
-        <th>Image</th>
+        <th>Images</th>
         <th>Title</th>
         <th>Location</th>
         <th>Price</th>
@@ -165,9 +185,21 @@ mysqli_stmt_close($stmt);
     </thead>
     <tbody>
       <?php if (count($houses) > 0): ?>
-        <?php foreach ($houses as $house): ?>
+        <?php foreach ($houses as $i => $house): ?>
+          <?php $images = explode(',', $house['image']); ?>
           <tr>
-            <td><img src="images/<?= htmlspecialchars($house['image']); ?>" alt="<?= htmlspecialchars($house['title']); ?>" class="house-img"></td>
+            <td>
+              <div class="slider" id="slider-<?= $i ?>">
+                <?php foreach ($images as $j => $img): ?>
+                  <img src="images/<?= htmlspecialchars($img) ?>" class="<?= $j === 0 ? 'active' : '' ?>">
+                <?php endforeach; ?>
+                <div class="dots">
+                  <?php foreach ($images as $j => $_): ?>
+                    <span class="dot <?= $j === 0 ? 'active' : '' ?>" onclick="setSlide(<?= $i ?>, <?= $j ?>)"></span>
+                  <?php endforeach; ?>
+                </div>
+              </div>
+            </td>
             <td><?= htmlspecialchars($house['title']); ?></td>
             <td><?= htmlspecialchars($house['location']); ?></td>
             <td>Rs<?= htmlspecialchars($house['price']); ?></td>
@@ -225,6 +257,17 @@ mysqli_stmt_close($stmt);
     </tbody>
   </table>
 </section>
+
+<script>
+function setSlide(sliderIndex, imgIndex) {
+  const slider = document.getElementById(`slider-${sliderIndex}`);
+  const imgs = slider.querySelectorAll('img');
+  const dots = slider.querySelectorAll('.dot');
+
+  imgs.forEach((img, i) => img.classList.toggle('active', i === imgIndex));
+  dots.forEach((dot, i) => dot.classList.toggle('active', i === imgIndex));
+}
+</script>
 
 </body>
 </html>
