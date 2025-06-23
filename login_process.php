@@ -35,9 +35,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     break;
                 case 'landlord':
                     header('Location: /homzey/landlord_dashboard.php');
+                    //echo $_SESSION['user_role'];  // outputs: landlord
                     break;
                 case 'admin':
                     header('Location: /homzey/admin_dashboard.php');
+                    //echo 'This is admin dashboard page.';
+                    //echo $_SESSION['user_role'];  // outputs: admin
                     break;
                 default:
                     header('Location: /homzey/index.php');
