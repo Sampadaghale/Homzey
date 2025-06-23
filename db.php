@@ -1,5 +1,8 @@
 <?php 
-$host = 'localhost';
+//$host = 'localhost';
+$host='localhost:3309'; 
+
+
 $db = 'houserent';
 $user = 'root';  // change if needed
 $pass = '';      // update with your DB password
