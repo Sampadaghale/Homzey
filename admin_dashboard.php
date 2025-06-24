@@ -113,8 +113,29 @@ $bookingsRes = $conn->query("
 </head>
 <body>
 <div class="container my-4">
+    
+        <!-- hellp adminn  -->
 
-    <h1 class="mb-4">Admin Dashboard</h1>
+        <div class="d-flex justify-content-between align-items-center p-3 mb-4 bg-light rounded shadow-sm">
+    <!-- Left: Logo -->
+    <div class="d-flex align-items-center">
+        <a href="index.php"><img src="image/house.png" alt="Logo" height="50" class="me-3"></a>
+    </div>
+
+    <!-- Center: Greeting and Title -->
+    <div class="text-center flex-grow-1">
+        <h1 class="mb-1">👋 Hello, <?php echo htmlspecialchars($_SESSION['user_name']); ?></h1>
+        <h5 class="text-muted">Admin Dashboard</h5>
+    </div>
+
+    <!-- Right: Logout -->
+    <div>
+        <a href="logout.php" class="btn btn-danger">Logout</a>
+        
+    </div>
+    
+</div>
+
 
     <!-- Summary cards -->
     <div class="row g-3 mb-4">
@@ -163,6 +184,7 @@ $bookingsRes = $conn->query("
                                 <th>Status</th>
                                 <th>Created At</th>
                                 <th>Action</th>
+                                
                             </tr>
                         </thead>
                         <tbody>

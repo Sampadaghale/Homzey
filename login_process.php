@@ -58,8 +58,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
-    mysqli_stmt_close($stmt);
-} else {
+    //mysqli_stmt_close($stmt);
+}
+ else {
     header('Location: /homzey/login.php');
     exit();
 }

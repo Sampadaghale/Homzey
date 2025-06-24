@@ -48,7 +48,12 @@ if ($result) {
             <a href="browse.php" tabindex="0">Browse</a>
             <a href="#about" tabindex="0">About</a>
             <a href="#contact" tabindex="0">Contact</a>
+            
+            <?php if (!isset($_SESSION['user_name'])): ?>
+                     <a href="login.php" tabindex="0" class="login">Login</a>
+            <?php endif; ?>
 
+            <!-- <a href="login.php" tabindex="0">Login</a> -->
             <?php if (isset($_SESSION['user_name'])): ?>
     <div class="user-dropdown-container">
         <button class="user-toggle" onclick="toggleDropdown()">
