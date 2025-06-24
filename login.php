@@ -14,7 +14,7 @@
 
   <!-- Logo Image -->
   <div class="logo-container">
-    <img src="image/house.png" alt="Homzey Logo" class="auth-logo">
+    <a href="index.php"><img src="image/house.png" alt="Homzey Logo" class="auth-logo"></a>
   </div>
 
         <form action="login_process.php" method="post" novalidate aria-label="Login form">
