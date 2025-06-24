@@ -16,7 +16,7 @@ if ($search !== '') {
     $stmt->execute();
     $result = $stmt->get_result();
 } else {
-    $sql = "SELECT * FROM houses ORDER BY created_at DESC";
+    $sql = "SELECT * FROM houses where is_approved=1 ORDER BY created_at DESC";
     $result = $conn->query($sql);
 }
 
@@ -133,7 +133,7 @@ if ($result) {
 <header>
     <nav class="container nav-flex">
         <div class="logo">
-            <img src="image/house.png" alt="Homzey logo" />
+            <a href="index.php"><img src="image/house.png" alt="Homzey logo" /></a>
         </div>
 
         <form action="browse.php" method="get" class="search-form">
@@ -146,22 +146,39 @@ if ($result) {
             <a href="browse.php">Browse</a>
 
             <?php if (isset($_SESSION['user_name'])): ?>
-                <div class="user-dropdown-container">
-                    <button class="user-toggle" onclick="toggleDropdown()">
-                        <span><?= htmlspecialchars($_SESSION['user_name']); ?></span>
-                        <i class="fa fa-caret-down"></i>
-                    </button>
-                    <div id="userDropdown" class="user-dropdown hidden">
-                        <strong class="user-name"><?= htmlspecialchars($_SESSION['user_name']); ?></strong>
-                        <?php if ($_SESSION['user_role'] === 'tenant'): ?>
-                            <a href="tenant_dashboard.php" class="account-button booking-btn">My Bookings</a>
-                        <?php endif; ?>
-                        <a href="logout.php" class="account-button logout-btn">Logout</a>
-                    </div>
-                </div>
-            <?php else: ?>
-                <a href="login.php">Login</a>
+    <div class="user-dropdown-container">
+        <button class="user-toggle" onclick="toggleDropdown()">
+            <span><?= htmlspecialchars($_SESSION['user_name']); ?></span>
+            <i class="fa fa-caret-down"></i>
+        </button>
+        <div id="userDropdown" class="user-dropdown hidden">
+            <strong class="user-name"><?= htmlspecialchars($_SESSION['user_name']); ?></strong>
+
+            <!-- Dashboard Button with Role-Based Redirect -->
+            <?php if ($_SESSION['user_role'] === 'admin'): ?>
+                <a href="admin_dashboard.php" class="account-button dashboard-btn">
+                    <i class="fa fa-user-shield"></i> Admin Dashboard
+                </a>
+            <?php elseif ($_SESSION['user_role'] === 'tenant'): ?>
+                <a href="tenant_dashboard.php" class="account-button dashboard-btn">
+                    <i class="fa fa-home"></i> Tenant Dashboard
+                </a>
+                <a href="tenant_dashboard.php#bookings" class="account-button booking-btn">
+                    <i class="fa fa-calendar-check"></i> My Bookings
+                </a>
+            <?php elseif ($_SESSION['user_role'] === 'landlord'): ?>
+                <a href="landlord_dashboard.php" class="account-button dashboard-btn">
+                    <i class="fa fa-building"></i> Landlord Dashboard
+                </a>
             <?php endif; ?>
+
+            <!-- Logout Button -->
+            <a href="logout.php" class="account-button logout-btn">
+                <i class="fa fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </div>
+<?php endif; ?>
         </div>
     </nav>
 </header>

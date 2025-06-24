@@ -19,7 +19,7 @@ mysqli_stmt_bind_result($stmt, $name);
 mysqli_stmt_fetch($stmt);
 mysqli_stmt_close($stmt);
 
-// Fetch landlord's houses
+// Fetch landlord's houses (including is_approved field)
 $sql = "SELECT * FROM houses WHERE landlord_id = ?";
 $stmt = mysqli_prepare($conn, $sql);
 mysqli_stmt_bind_param($stmt, "i", $user_id);
@@ -97,6 +97,7 @@ mysqli_stmt_close($stmt);
       border: 1px solid #ddd;
       padding: 10px;
       text-align: left;
+      vertical-align: middle;
     }
     th {
       background-color: #4CAF50;
@@ -143,6 +144,8 @@ mysqli_stmt_close($stmt);
       padding: 6px 12px;
       border-radius: 4px;
       font-size: 14px;
+      margin-right: 5px;
+      display: inline-block;
     }
     .btn.delete {
       background: #dc3545;
@@ -155,13 +158,21 @@ mysqli_stmt_close($stmt);
       color: red;
       font-weight: bold;
     }
+    .approved {
+      color: green;
+      font-weight: bold;
+    }
+    .pending-approval {
+      color: orange;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
 
 <header>
   <div class="logo">
-    <img src="image/house.png" alt="Logo"> 
+    <a href="index.php"><img src="image/house.png" alt="Logo"> </a>
   </div>
   <nav>
     <a href="add_listing.php">Add Listing</a>
@@ -180,6 +191,7 @@ mysqli_stmt_close($stmt);
         <th>Title</th>
         <th>Location</th>
         <th>Price</th>
+        <th>Approved</th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -204,13 +216,20 @@ mysqli_stmt_close($stmt);
             <td><?= htmlspecialchars($house['location']); ?></td>
             <td>Rs<?= htmlspecialchars($house['price']); ?></td>
             <td>
+              <?php if (!empty($house['is_approved']) && $house['is_approved'] == 1): ?>
+                <span class="approved">Approved</span>
+              <?php else: ?>
+                <span class="pending-approval">Pending</span>
+              <?php endif; ?>
+            </td>
+            <td>
               <a href="edit_listing.php?id=<?= $house['id']; ?>" class="btn">Edit</a>
               <a href="delete_listing.php?id=<?= $house['id']; ?>" class="btn delete" onclick="return confirm('Are you sure to delete this listing?');">Delete</a>
             </td>
           </tr>
         <?php endforeach; ?>
       <?php else: ?>
-        <tr><td colspan="5">No listings found.</td></tr>
+        <tr><td colspan="6">No listings found.</td></tr>
       <?php endif; ?>
     </tbody>
   </table>
