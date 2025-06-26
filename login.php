@@ -43,7 +43,7 @@
             <option value="">-- Select Role --</option>
             <option value="tenant">Tenant</option>
             <option value="landlord">Landlord</option>
-            <option value="admin">Admin</option>
+            <!-- <option value="admin">Admin</option> -->
           </select>
 
           <button type="submit" aria-label="Submit login form">Login</button>
