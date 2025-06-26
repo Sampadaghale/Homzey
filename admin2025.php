@@ -1,236 +1,174 @@
+<?php
+session_start();
+require 'db.php'; // Ensure $conn is defined here
+
+$error = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $email = trim($_POST['email'] ?? '');
+    $password = $_POST['password'] ?? '';
+
+    if (empty($email) || empty($password)) {
+        $error = 'Please fill in all fields.';
+    } else {
+        $sql = "SELECT id, name, email, password, role FROM users WHERE email = ? AND role = 'admin'";
+        $stmt = mysqli_prepare($conn, $sql);
+        mysqli_stmt_bind_param($stmt, "s", $email);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+
+        if ($result && $user = mysqli_fetch_assoc($result)) {
+            if (password_verify($password, $user['password'])) {
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['user_name'] = $user['name'];
+                $_SESSION['user_email'] = $user['email'];
+                $_SESSION['user_role'] = $user['role'];
+                header("Location: admin_dashboard.php");
+                exit();
+            } else {
+                $error = "Incorrect password.";
+            }
+        } else {
+            $error = "Admin not found or role mismatch.";
+        }
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Admin Login - Homzey</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --primary: #6c63ff;
-      --primary-dark: #564fd8;
-      --secondary: #4dabf7;
-      --danger: #ff6b6b;
-      --light: #f8f9fa;
-      --dark: #343a40;
-      --gray: #6c757d;
-      --border-radius: 12px;
-      --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-      --transition: all 0.3s ease;
-    }
-    
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
     body {
       font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    }
+
+    .auth-section {
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
-      padding: 20px;
+      flex-direction: column;
+      height: 100vh;
+      background-color: #fef3c7;
     }
-    
-    .login-container {
-      background: white;
-      padding: 40px;
-      border-radius: var(--border-radius);
-      box-shadow: var(--box-shadow);
-      width: 100%;
-      max-width: 450px;
-      position: relative;
-      overflow: hidden;
-      z-index: 1;
+
+    .auth-card {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      padding: 2rem;
+      width: 95%;
+      max-width: 400px;
     }
-    
-    .login-container::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 8px;
-      background: linear-gradient(to right, var(--primary), var(--secondary));
-    }
-    
-    .logo {
+
+    .auth-card h3 {
       text-align: center;
-      margin-bottom: 30px;
-    }
-    
-    .logo i {
-      font-size: 2.5rem;
-      color: var(--primary);
-      margin-bottom: 10px;
-    }
-    
-    .logo h1 {
-      font-size: 1.8rem;
-      color: var(--dark);
+      margin-bottom: 1.5rem;
       font-weight: 600;
+      color: #111827;
     }
-    
-    .logo p {
-      color: var(--gray);
-      font-size: 0.9rem;
-    }
-    
-    h2 {
-      text-align: center;
-      margin-bottom: 25px;
-      color: var(--dark);
-      font-weight: 600;
-      font-size: 1.5rem;
-    }
-    
-    .form-group {
-      margin-bottom: 20px;
-      position: relative;
-    }
-    
-    .form-group label {
+
+    .auth-logo {
+      width: 70px;
+      height: auto;
       display: block;
-      margin-bottom: 8px;
-      color: var(--dark);
-      font-weight: 500;
+      margin: -2rem auto 1rem auto;
     }
-    
-    .input-with-icon {
-      position: relative;
+
+    .logo-container {
+      text-align: center;
     }
-    
-    .input-with-icon i {
-      position: absolute;
-      left: 15px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--gray);
+
+    label {
+      margin-top: 1rem;
+      font-weight: bold;
+      display: block;
     }
-    
-    input[type="email"], 
+
+    input[type="email"],
     input[type="password"] {
       width: 100%;
-      padding: 14px 14px 14px 45px;
-      border: 1px solid #e0e0e0;
-      border-radius: var(--border-radius);
-      font-size: 15px;
-      transition: var(--transition);
+      padding: 0.5rem;
+      margin-top: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
     }
-    
-    input[type="email"]:focus, 
-    input[type="password"]:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.2);
-    }
-    
-    .btn {
+
+    button {
       width: 100%;
-      padding: 14px;
-      background: linear-gradient(to right, var(--primary), var(--secondary));
+      background-color: #92400e;
       color: white;
       border: none;
-      border-radius: var(--border-radius);
-      font-size: 16px;
-      font-weight: 500;
+      border-radius: 4px;
+      padding: 0.75rem;
+      font-size: 1rem;
+      margin-top: 1.5rem;
       cursor: pointer;
-      transition: var(--transition);
-      margin-top: 10px;
     }
-    
-    .btn:hover {
-      background: linear-gradient(to right, var(--primary-dark), var(--secondary));
-      transform: translateY(-2px);
+
+    button:hover {
+      background-color: #7a3e0e;
     }
-    
-    .error {
-      background-color: rgba(255, 107, 107, 0.1);
-      color: var(--danger);
-      padding: 12px;
-      border-radius: var(--border-radius);
-      margin-bottom: 20px;
+
+    .signup-link {
       text-align: center;
-      border-left: 4px solid var(--danger);
-      font-size: 14px;
+      margin-top: 1rem;
     }
-    
-    .footer-links {
-      margin-top: 25px;
-      text-align: center;
-      font-size: 14px;
-    }
-    
-    .footer-links a {
-      color: var(--gray);
+
+    .signup-link a {
+      color: #3b82f6;
       text-decoration: none;
-      transition: var(--transition);
+      font-weight: bold;
     }
-    
-    .footer-links a:hover {
-      color: var(--primary);
+
+    .signup-link a:hover {
+      text-decoration: underline;
     }
-    
-    .footer-links span {
-      margin: 0 10px;
-      color: #e0e0e0;
-    }
-    
-    @media (max-width: 480px) {
-      .login-container {
-        padding: 30px 20px;
-      }
-      
-      .logo h1 {
-        font-size: 1.5rem;
-      }
-      
-      h2 {
-        font-size: 1.3rem;
-      }
+
+    .error {
+      background-color: #fef2f2;
+      color: #b91c1c;
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      text-align: center;
     }
   </style>
 </head>
 <body>
-  <div class="login-container">
-    <div class="logo">
-      <i class="fas fa-home"></i>
-      <h1>Homzey</h1>
-      <p>Admin Dashboard</p>
-    </div>
-    
-    <h2>Sign In</h2>    
-    <form method="POST" action="">
-      <div class="form-group">
-        <label for="email">Email Address</label>
-        <div class="input-with-icon">
-          <i class="fas fa-envelope"></i>
-          <input type="email" id="email" name="email" placeholder="admin@example.com" required>
-        </div>
+  <section class="auth-section">
+    <div class="auth-card">
+      <div class="logo-container">
+        <a href="index.php"><img src="image/house.png" alt="Homzey Logo" class="auth-logo"></a>
       </div>
-      
-      <div class="form-group">
+      <h3>Admin Login</h3>
+
+      <?php if (!empty($error)): ?>
+        <div class="error">
+          <i class="fas fa-exclamation-circle"></i> <?= htmlspecialchars($error) ?>
+        </div>
+      <?php endif; ?>
+
+      <form method="POST" action="">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="admin@example.com" required>
+
         <label for="password">Password</label>
-        <div class="input-with-icon">
-          <i class="fas fa-lock"></i>
-          <input type="password" id="password" name="password" placeholder="••••••••" required>
-        </div>
+        <input type="password" id="password" name="password" placeholder="••••••••" required>
+
+        <button type="submit">Login</button>
+      </form>
+
+      <div class="signup-link">
+        <a href="#">Forgot password?</a>
       </div>
-      
-      <button type="submit" class="btn">
-        <i class="fas fa-sign-in-alt"></i> Login
-      </button>
-    </form>
-    
-    <div class="footer-links">
-      <a href="#"><i class="fas fa-question-circle"></i> Need help?</a>
-      <span>|</span>
-      <a href="#"><i class="fas fa-key"></i> Forgot password?</a>
     </div>
-  </div>
+  </section>
 </body>
 </html>

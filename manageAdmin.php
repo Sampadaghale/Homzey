@@ -1,3 +1,75 @@
+<?php
+session_start();
+require 'db.php';
+
+// If not logged in and trying to log in
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_superadmin'])) {
+    $email = trim($_POST['email']);
+    $password = $_POST['password'];
+
+    $stmt = $conn->prepare("SELECT * FROM users WHERE email = ? AND role = 'superadmin'");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $res = $stmt->get_result();
+
+    if ($res && $user = $res->fetch_assoc()) {
+        if (password_verify($password, $user['password'])) {
+            $_SESSION['superadmin'] = $user;
+            header("Location: manageAdmin.php");
+            exit();
+        } else {
+            $error = "Incorrect password.";
+        }
+    } else {
+        $error = "Superadmin not found.";
+    }
+}
+
+// Logout
+if (isset($_GET['logout'])) {
+    session_destroy();
+    header("Location: manageAdmin.php");
+    exit();
+}
+
+// CRUD actions (only for logged-in superadmin)
+if (isset($_SESSION['superadmin'])) {
+    // Create admin
+    if (isset($_POST['action']) && $_POST['action'] === 'create') {
+        $name = trim($_POST['name']);
+        $email = trim($_POST['email']);
+        $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
+        $stmt = $conn->prepare("INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, 'admin')");
+        $stmt->bind_param("sss", $name, $email, $password);
+        $stmt->execute();
+        $success = "Admin created successfully!";
+    }
+
+    // Update admin
+    if (isset($_POST['action']) && $_POST['action'] === 'update') {
+        $id = $_POST['id'];
+        $name = trim($_POST['name']);
+        $email = trim($_POST['email']);
+        $stmt = $conn->prepare("UPDATE users SET name=?, email=? WHERE id=? AND role='admin'");
+        $stmt->bind_param("ssi", $name, $email, $id);
+        $stmt->execute();
+        $success = "Admin updated successfully!";
+    }
+
+    // Delete admin
+    if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
+        $id = $_GET['delete'];
+        $stmt = $conn->prepare("DELETE FROM users WHERE id=? AND role='admin'");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $success = "Admin deleted successfully!";
+    }
+
+    // Fetch admins
+    $admins = $conn->query("SELECT * FROM users WHERE role = 'admin'");
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,16 +80,12 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
     :root {
-      --primary: #6c63ff;
-      --primary-dark: #564fd8;
-      --danger: #ff6b6b;
+      --primary: #4361ee;
+      --primary-dark: #3a56d4;
+      --danger: #f44336;
       --danger-dark: #e53935;
       --success: #4caf50;
       --success-dark: #43a047;
-      --warning: #ff9800;
-      --info: #2196f3;
-      --light: #f8f9fa;
-      --dark: #343a40;
       --gray-100: #f8f9fa;
       --gray-200: #e9ecef;
       --gray-300: #dee2e6;
@@ -27,9 +95,6 @@
       --gray-700: #495057;
       --gray-800: #343a40;
       --gray-900: #212529;
-      --border-radius: 8px;
-      --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-      --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     }
     
     * {
@@ -40,7 +105,7 @@
     
     body {
       font-family: 'Inter', sans-serif;
-      background-color: #f5f7ff;
+      background-color: var(--gray-100);
       color: var(--gray-800);
       line-height: 1.6;
     }
@@ -53,16 +118,10 @@
     
     .card {
       background: white;
-      border-radius: var(--border-radius);
-      box-shadow: var(--box-shadow);
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
       padding: 2rem;
       margin-bottom: 2rem;
-      transition: var(--transition);
-      border: 1px solid rgba(0, 0, 0, 0.05);
-    }
-    
-    .card:hover {
-      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
     }
     
     .header {
@@ -70,28 +129,20 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 2rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid var(--gray-200);
     }
     
-    h1, h2, h3, h4 {
+    h1, h2, h3 {
       color: var(--gray-800);
       font-weight: 600;
     }
     
     h1 {
       font-size: 1.75rem;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
     }
     
     h2 {
       font-size: 1.5rem;
       margin-bottom: 1.5rem;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
     }
     
     h3 {
@@ -103,15 +154,13 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 0.75rem 1.5rem;
-      border-radius: var(--border-radius);
+      padding: 0.625rem 1.25rem;
+      border-radius: 0.375rem;
       font-weight: 500;
       cursor: pointer;
-      transition: var(--transition);
+      transition: all 0.2s ease;
       border: none;
       text-decoration: none;
-      font-size: 0.95rem;
-      gap: 0.5rem;
     }
     
     .btn-primary {
@@ -121,7 +170,6 @@
     
     .btn-primary:hover {
       background-color: var(--primary-dark);
-      transform: translateY(-2px);
     }
     
     .btn-danger {
@@ -131,7 +179,6 @@
     
     .btn-danger:hover {
       background-color: var(--danger-dark);
-      transform: translateY(-2px);
     }
     
     .btn-success {
@@ -141,7 +188,6 @@
     
     .btn-success:hover {
       background-color: var(--success-dark);
-      transform: translateY(-2px);
     }
     
     .btn-outline {
@@ -152,16 +198,19 @@
     
     .btn-outline:hover {
       background: var(--gray-100);
-      transform: translateY(-2px);
     }
     
     .btn-sm {
-      padding: 0.5rem 1rem;
-      font-size: 0.85rem;
+      padding: 0.375rem 0.75rem;
+      font-size: 0.875rem;
+    }
+    
+    .btn i {
+      margin-right: 0.5rem;
     }
     
     .form-group {
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.25rem;
     }
     
     label {
@@ -169,49 +218,41 @@
       margin-bottom: 0.5rem;
       font-weight: 500;
       color: var(--gray-700);
-      font-size: 0.95rem;
     }
     
     input[type="text"],
     input[type="email"],
-    input[type="password"],
-    select {
+    input[type="password"] {
       width: 100%;
-      padding: 0.875rem;
+      padding: 0.75rem;
       border: 1px solid var(--gray-300);
-      border-radius: var(--border-radius);
+      border-radius: 0.375rem;
       font-size: 1rem;
-      transition: var(--transition);
-      background-color: white;
+      transition: border-color 0.2s;
     }
     
     input[type="text"]:focus,
     input[type="email"]:focus,
-    input[type="password"]:focus,
-    select:focus {
+    input[type="password"]:focus {
       outline: none;
       border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.15);
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
     }
     
     .alert {
-      padding: 1rem 1.25rem;
-      border-radius: var(--border-radius);
+      padding: 1rem;
+      border-radius: 0.375rem;
       margin-bottom: 1.5rem;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      font-size: 0.95rem;
     }
     
     .alert-danger {
-      background-color: rgba(255, 107, 107, 0.1);
+      background-color: #fdecea;
       color: var(--danger);
       border-left: 4px solid var(--danger);
     }
     
     .alert-success {
-      background-color: rgba(76, 175, 80, 0.1);
+      background-color: #e8f5e9;
       color: var(--success);
       border-left: 4px solid var(--success);
     }
@@ -220,14 +261,10 @@
       width: 100%;
       border-collapse: collapse;
       margin-top: 1.5rem;
-      background: white;
-      border-radius: var(--border-radius);
-      overflow: hidden;
-      box-shadow: 0 0 0 1px var(--gray-200);
     }
     
     th, td {
-      padding: 1.25rem;
+      padding: 1rem;
       text-align: left;
       border-bottom: 1px solid var(--gray-200);
     }
@@ -241,36 +278,28 @@
       letter-spacing: 0.05em;
     }
     
-    tr:last-child td {
-      border-bottom: none;
-    }
-    
     tr:hover {
-      background-color: rgba(108, 99, 255, 0.03);
+      background-color: var(--gray-50);
     }
     
     .actions {
       display: flex;
-      gap: 0.75rem;
+      gap: 0.5rem;
     }
     
     .login-container {
-      max-width: 450px;
+      max-width: 400px;
       margin: 5rem auto;
     }
     
     .login-logo {
       text-align: center;
-      margin-bottom: 2.5rem;
+      margin-bottom: 2rem;
     }
     
     .login-logo i {
-      font-size: 3.5rem;
+      font-size: 3rem;
       color: var(--primary);
-      background: rgba(108, 99, 255, 0.1);
-      padding: 1.5rem;
-      border-radius: 50%;
-      margin-bottom: 1.5rem;
     }
     
     .login-title {
@@ -280,91 +309,143 @@
     
     .footer {
       text-align: center;
-      margin-top: 3rem;
+      margin-top: 2rem;
       color: var(--gray-600);
       font-size: 0.875rem;
-      padding-top: 1.5rem;
-      border-top: 1px solid var(--gray-200);
-    }
-    
-    .welcome-message {
-      color: var(--gray-600);
-      font-size: 0.95rem;
-    }
-    
-    .input-with-icon {
-      position: relative;
-    }
-    
-    .input-with-icon i {
-      position: absolute;
-      left: 15px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--gray-500);
-    }
-    
-    .input-with-icon input {
-      padding-left: 45px;
     }
     
     @media (max-width: 768px) {
       .container {
-        padding: 1.5rem;
+        padding: 1rem;
       }
       
       .header {
         flex-direction: column;
         align-items: flex-start;
-        gap: 1.25rem;
+        gap: 1rem;
       }
       
       .actions {
         flex-direction: column;
-        gap: 0.75rem;
-      }
-      
-      th, td {
-        padding: 1rem;
+        gap: 0.5rem;
       }
     }
   </style>
 </head>
 <body>
 
-<!-- Login Page -->
-<div class="container login-container">
-  <div class="login-logo">
-    <i class="fas fa-shield-alt"></i>
-    <h2>Superadmin Portal</h2>
-  </div>
-  <div class="card">
-    <div class="alert alert-danger">
-      <i class="fas fa-exclamation-circle"></i> Incorrect password.
+<?php if (!isset($_SESSION['superadmin'])): ?>
+  <div class="container login-container">
+    <div class="login-logo">
+      <i class="fas fa-shield-alt"></i>
     </div>
-    <form>
-      <div class="form-group">
-        <label for="email">Email Address</label>
-        <div class="input-with-icon">
-          <i class="fas fa-envelope"></i>
-          <input type="email" id="email" name="email" placeholder="superadmin@example.com" required>
+    <div class="card">
+      <h2 class="login-title">Superadmin Portal</h2>
+      <?php if (isset($error)): ?>
+        <div class="alert alert-danger">
+          <i class="fas fa-exclamation-circle"></i> <?= $error ?>
         </div>
-      </div>
-      <div class="form-group">
-        <label for="password">Password</label>
-        <div class="input-with-icon">
-          <i class="fas fa-lock"></i>
-          <input type="password" id="password" name="password" placeholder="••••••••" required>
+      <?php endif; ?>
+      <form method="POST">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" placeholder="Enter your email" required>
         </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="Enter your password" required>
+        </div>
+        <button type="submit" name="login_superadmin" class="btn btn-primary" style="width: 100%;">
+          <i class="fas fa-sign-in-alt"></i> Login
+        </button>
+      </form>
+    </div>
+    <div class="footer">
+      <p>Admin Management System &copy; <?= date('Y') ?></p>
+    </div>
+  </div>
+<?php else: ?>
+  <div class="container">
+    <div class="header">
+      <div>
+        <h1><i class="fas fa-shield-alt"></i> Admin Management</h1>
+        <p>Welcome back, <?= htmlspecialchars($_SESSION['superadmin']['name']) ?></p>
       </div>
-      <button type="submit" class="btn btn-primary" style="width: 100%;">
-        <i class="fas fa-sign-in-alt"></i> Login
-      </button>
-    </form>
+      <a href="?logout" class="btn btn-danger">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </a>
+    </div>
+    
+    <?php if (isset($success)): ?>
+      <div class="alert alert-success">
+        <i class="fas fa-check-circle"></i> <?= $success ?>
+      </div>
+    <?php endif; ?>
+    
+    <div class="card">
+      <h2><i class="fas fa-user-plus"></i> Create New Admin</h2>
+      <form method="POST">
+        <input type="hidden" name="action" value="create">
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" name="name" placeholder="Enter admin's full name" required>
+        </div>
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" name="email" placeholder="Enter admin's email" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="Set a password" required>
+        </div>
+        <button type="submit" class="btn btn-success">
+          <i class="fas fa-save"></i> Create Admin
+        </button>
+      </form>
+    </div>
+    
+    <div class="card">
+      <h2><i class="fas fa-users-cog"></i> Admin List</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php while ($admin = $admins->fetch_assoc()): ?>
+          <tr>
+            <form method="POST">
+              <input type="hidden" name="action" value="update">
+              <input type="hidden" name="id" value="<?= $admin['id'] ?>">
+              <td>
+                <input type="text" name="name" value="<?= htmlspecialchars($admin['name']) ?>" required>
+              </td>
+              <td>
+                <input type="email" name="email" value="<?= htmlspecialchars($admin['email']) ?>" required>
+              </td>
+              <td class="actions">
+                <button type="submit" class="btn btn-primary btn-sm">
+                  <i class="fas fa-edit"></i> Update
+                </button>
+                <a href="?delete=<?= $admin['id'] ?>" onclick="return confirm('Are you sure you want to delete this admin?')" class="btn btn-danger btn-sm">
+                  <i class="fas fa-trash-alt"></i> Delete
+                </a>
+              </td>
+            </form>
+          </tr>
+          <?php endwhile; ?>
+        </tbody>
+      </table>
+    </div>
+    
+    <div class="footer">
+      <p>Admin Management System &copy; <?= date('Y') ?></p>
+    </div>
   </div>
-  <div class="footer">
-    <p>Admin Management System &copy; 2023</p>
-  </div>
-</div>
+<?php endif; ?>
+
 </body>
 </html>

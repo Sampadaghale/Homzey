@@ -15,7 +15,7 @@ $bookedHouses = $conn->query("SELECT COUNT(*) FROM houses WHERE status IN ('book
 $availableHouses = $conn->query("SELECT COUNT(*) FROM houses WHERE status = 'available' AND is_approved = 1")->fetch_row()[0];
 $pendingHouses = $conn->query("SELECT COUNT(*) FROM houses WHERE is_approved = 0")->fetch_row()[0];
 
-$totalUsers = $conn->query("SELECT COUNT(*) FROM users WHERE role != 'admin'")->fetch_row()[0];
+$totalUsers = $conn->query("SELECT COUNT(*) FROM users WHERE role != 'admin' AND role!='superadmin' ")->fetch_row()[0];
 $blockedUsers = $conn->query("SELECT COUNT(*) FROM users WHERE status = 'blocked'")->fetch_row()[0];
 
 $totalBookings = $conn->query("SELECT COUNT(*) FROM bookings")->fetch_row()[0];
@@ -62,7 +62,7 @@ $allHousesRes = $conn->query("
 ");
 
 //Fetch users
-$usersRes = $conn->query("SELECT * FROM users WHERE role != 'admin' ORDER BY id DESC");
+$usersRes = $conn->query("SELECT * FROM users WHERE role != 'admin' AND role != 'superadmin' ORDER BY id DESC");
 
 //Bookings
 $bookingsRes = $conn->query("
