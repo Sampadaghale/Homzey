@@ -19,6 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_superadmin'])) 
             exit();
         } else {
             $error = "Incorrect password.";
+            
         }
     } else {
         $error = "Superadmin not found.";
