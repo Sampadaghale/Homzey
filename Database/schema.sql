@@ -34,7 +34,7 @@ CREATE TABLE bookings (
     FOREIGN KEY (house_id) REFERENCES houses(id),
     name VARCHAR(255) NOT NULL,
     address VARCHAR(255) NOT NULL,
-    phone VHARCHAR(20) NOT NULL
+    phone VARCHAR(20) NOT NULL
 );
 CREATE TABLE reviews (
     id INT AUTO_INCREMENT PRIMARY KEY,
