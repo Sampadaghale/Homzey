@@ -1,4 +1,4 @@
-<?php    
+<?php
 session_start();
 include 'db.php'; // expects $conn = mysqli_connect(...)
 
@@ -8,6 +8,12 @@ if (!isset($_SESSION["user_id"]) || $_SESSION["user_role"] !== "landlord") {
 }
 
 $user_id = $_SESSION["user_id"];
+
+// Optional: show success/error message after booking action
+$msg = '';
+if (isset($_GET['msg'])) {
+    $msg = htmlspecialchars($_GET['msg']);
+}
 
 // Fetch landlord's name
 $name = "";
@@ -138,17 +144,22 @@ mysqli_stmt_close($stmt);
       background-color: #717171;
     }
     .btn {
+      cursor: pointer;
       background: #4CAF50;
       color: white;
-      text-decoration: none;
+      border: none;
       padding: 6px 12px;
       border-radius: 4px;
       font-size: 14px;
       margin-right: 5px;
       display: inline-block;
+      text-decoration: none;
     }
     .btn.delete {
       background: #dc3545;
+    }
+    .btn:hover {
+      opacity: 0.9;
     }
     .status-confirmed {
       color: green;
@@ -166,6 +177,22 @@ mysqli_stmt_close($stmt);
       color: orange;
       font-weight: bold;
     }
+    /* Smaller buttons for booking actions */
+    form.booking-action-form button {
+      font-size: 12px;
+      padding: 4px 8px;
+      margin-left: 5px;
+    }
+    /* Success message */
+    .message {
+      background: #d4edda;
+      color: #155724;
+      padding: 10px;
+      margin: 20px auto;
+      width: 90%;
+      border-radius: 5px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -179,6 +206,10 @@ mysqli_stmt_close($stmt);
     <a href="logout.php">Logout</a>
   </nav>
 </header>
+
+<?php if ($msg): ?>
+  <div class="message"><?= $msg ?></div>
+<?php endif; ?>
 
 <h1>Welcome, <?= htmlspecialchars($name); ?>!</h1>
 
@@ -247,7 +278,7 @@ mysqli_stmt_close($stmt);
         <th>Start Date</th>
         <th>End Date</th>
         <th>Total Price</th>
-        <th>Status</th>
+        <th>Status / Actions</th>
       </tr>
     </thead>
     <tbody>
@@ -267,6 +298,13 @@ mysqli_stmt_close($stmt);
             <td>Rs<?= htmlspecialchars($booking['total_price']); ?></td>
             <td class="status-<?= strtolower(htmlspecialchars($booking['status'])); ?>">
               <?= htmlspecialchars(ucfirst($booking['status'])); ?>
+              <?php if ($booking['status'] === 'pending'): ?>
+                <form action="handle_booking_action.php" method="post" class="booking-action-form" style="display:inline-block; margin-left:10px;">
+                  <input type="hidden" name="booking_id" value="<?= $booking['id'] ?>">
+                  <button type="submit" name="action" value="accept" class="btn">Accept</button>
+                  <button type="submit" name="action" value="reject" class="btn delete">Reject</button>
+                </form>
+              <?php endif; ?>
             </td>
           </tr>
         <?php endforeach; ?>

@@ -19,6 +19,13 @@ CREATE TABLE houses (
     status VARCHAR(20) DEFAULT 'available',
     FOREIGN KEY (landlord_id) REFERENCES users(id)
 );
+
+ALTER TABLE houses
+ADD COLUMN rooms INT,
+ADD COLUMN kitchen INT,
+ADD COLUMN bathroom INT,
+ADD COLUMN bhk VARCHAR(10);  -- e.g., '2BHK', '3BHK'
+
 CREATE TABLE bookings (
     id INT PRIMARY KEY AUTO_INCREMENT,
     tenant_id INT NOT NULL,
@@ -34,7 +41,7 @@ CREATE TABLE bookings (
     FOREIGN KEY (house_id) REFERENCES houses(id),
     name VARCHAR(255) NOT NULL,
     address VARCHAR(255) NOT NULL,
-    phone VHARCHAR(20) NOT NULL
+    phone VARCHAR(20) NOT NULL
 );
 CREATE TABLE reviews (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -47,3 +54,14 @@ CREATE TABLE reviews (
     FOREIGN KEY (tenant_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+CREATE TABLE maintenance_requests (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    house_id INT NOT NULL,
+    category VARCHAR(100),
+    description TEXT,
+    status VARCHAR(50) DEFAULT 'Pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (tenant_id) REFERENCES users(id),
+    FOREIGN KEY (house_id) REFERENCES houses(id)
+);

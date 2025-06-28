@@ -16,7 +16,7 @@ if ($search !== '') {
     $stmt->execute();
     $result = $stmt->get_result();
 } else {
-    $sql = "SELECT * FROM houses where is_approved=1 ORDER BY created_at DESC";
+    $sql = "SELECT * FROM houses ORDER BY created_at DESC";
     $result = $conn->query($sql);
 }
 
@@ -39,6 +39,24 @@ if ($result) {
 <link rel="stylesheet" href="browse.css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 <style>
+  .browse {
+  margin-top: 0.5rem; /* small gap, adjust to 0 or a bit more as needed */
+  padding-top: 0.5rem; /* reduce any padding if present */
+}
+
+/* Also check if <main> has margin or padding and reduce it */
+main {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+  .browse h1,
+.browse p {
+  text-align: center;
+  margin-top: 0;
+  padding-top: 0.5rem
+}
+
   .badge-booked {
     background-color: #ef4444;
     color: white;
@@ -109,11 +127,14 @@ if ($result) {
   }
 
   .browse-grid {
-    display: grid;
-    gap: 2rem;
-    padding: 2rem;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  }
+  display: grid;
+  gap: 2rem;
+  padding: 2rem;
+  /* change this: */
+  grid-template-columns: repeat(auto-fit, minmax(300px, max-content));
+  justify-content: center; /* center the grid items horizontally */
+}
+
 
   .btn-disabled {
     background-color: #999;

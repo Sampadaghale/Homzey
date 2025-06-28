@@ -1,6 +1,7 @@
 <?php 
 //$host = 'localhost';
-$host='localhost:3309'; 
+$host='localhost'; 
+$port='3306';
 
 
 $db = 'houserent';

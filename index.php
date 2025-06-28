@@ -28,7 +28,6 @@ if ($result) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
 <body>
-<script src="script.js"></script>
 
 <header>
     <nav class="container nav-flex" aria-label="Primary Navigation">
@@ -72,7 +71,7 @@ if ($result) {
                 <a href="tenant_dashboard.php" class="account-button dashboard-btn">
                     <i class="fa fa-home"></i> Tenant Dashboard
                 </a>
-                <a href="tenant_dashboard.php#bookings" class="account-button booking-btn">
+                <a href="mybooking.php#bookings" class="account-button booking-btn">
                     <i class="fa fa-calendar-check"></i> My Bookings
                 </a>
             <?php elseif ($_SESSION['user_role'] === 'landlord'): ?>
@@ -109,23 +108,45 @@ if ($result) {
             </button>
         </div>
     </section>
-
-    <section class="browse" aria-labelledby="browse-title" id="browse">
-        <h2 id="browse-title">Browse Our Rentals</h2>
-        <div class="browse-grid" role="list">
-            <?php foreach ($houses as $house): ?>
-                <article class="property-card" role="listitem" tabindex="0" aria-label="<?= htmlspecialchars($house['title']) . ' in ' . htmlspecialchars($house['location']) . ' for $' . htmlspecialchars($house['price']) . ' per month'; ?>">
-                   <img class="property-image" src="images/<?= htmlspecialchars($house['image']); ?>" alt="<?= htmlspecialchars($house['title']); ?>" />
-                    <div class="property-info">
-                        <h3 class="property-title"><?= htmlspecialchars($house['title']); ?></h3>
-                        <p class="property-location"><?= htmlspecialchars($house['location']); ?></p>
-                        <p class="property-price">Rs<?= htmlspecialchars($house['price']); ?> / month</p>
-                        <a href="details.php?id=<?= $house['id']; ?>" class="btn btn-primary" aria-label="View details of <?= htmlspecialchars($house['title']); ?>">View Details</a>
-                    </div>
-                </article>
+<section class="browse" aria-labelledby="browse-title" id="browse">   
+  <h2 id="browse-title">Browse Our Rentals</h2>
+  <div class="browse-grid" role="list">
+    <?php foreach ($houses as $house): 
+      $imageList = explode(',', $house['image']);
+      $imageList = array_map('trim', $imageList);
+      $imageList = array_slice($imageList, 0, 4); // Limit to max 4 images
+      $sliderId = "slider_" . $house['id'];
+    ?>
+      <article class="property-card" role="listitem" tabindex="0" aria-label="<?= htmlspecialchars($house['title']) . ' in ' . htmlspecialchars($house['location']) . ' for Rs' . htmlspecialchars($house['price']) . ' per month'; ?>">
+        <div class="slider" id="<?= $sliderId ?>">
+          <div class="slider-images">
+            <?php foreach ($imageList as $img): ?>
+              <img src="images/<?= htmlspecialchars($img); ?>" alt="<?= htmlspecialchars($house['title']); ?>" />
             <?php endforeach; ?>
+          </div>
+
+          <?php if(count($imageList) > 1): ?>
+            <button class="slider-btn prev" onclick="slidePrev('<?= $sliderId ?>')" aria-label="Previous image">&#10094;</button>
+            <button class="slider-btn next" onclick="slideNext('<?= $sliderId ?>')" aria-label="Next image">&#10095;</button>
+
+            <div class="slider-dots">
+              <?php foreach ($imageList as $index => $img): ?>
+                <span class="slider-dot" onclick="goToSlide('<?= $sliderId ?>', <?= $index ?>)" aria-label="Go to image <?= $index + 1 ?>"></span>
+              <?php endforeach; ?>
+            </div>
+          <?php endif; ?>
         </div>
-    </section>
+
+        <div class="property-info">
+          <h3 class="property-title"><?= htmlspecialchars($house['title']); ?></h3>
+          <p class="property-location"><?= htmlspecialchars($house['location']); ?></p>
+          <p class="property-price">Rs<?= htmlspecialchars($house['price']); ?> / month</p>
+          <a href="details.php?id=<?= $house['id']; ?>" class="btn btn-primary" aria-label="View details of <?= htmlspecialchars($house['title']); ?>">View Details</a>
+        </div>
+      </article>
+    <?php endforeach; ?>
+  </div>
+</section>
 
     <section class="features" aria-labelledby="features-title">
         <h2 id="features-title">Why Choose HouseRent?</h2>
@@ -238,6 +259,7 @@ if ($result) {
 <footer>
     &copy; 2025 Homzey. All rights reserved.
 </footer>
+<script src="script.js"></script>
 
 </body>
 </html>
