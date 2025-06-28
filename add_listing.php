@@ -3,7 +3,7 @@ session_start();
 require 'db.php'; // $conn (MySQLi connection)
 
 if (!isset($_SESSION["user_id"]) || $_SESSION["user_role"] !== "landlord") {
-    header("Location: login.php");
+    header("Location:login.php");
     exit();
 }
 
@@ -53,7 +53,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $executed = mysqli_stmt_execute($stmt);
 
             if ($executed) {
-                $successMessage = "Listing added successfully!";
+                $successMessage = "Listing added But Requires Admin Approval!";
             } else {
                 $errorMessage = "Database error: could not add listing.";
             }

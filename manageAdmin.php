@@ -2,7 +2,17 @@
 session_start();
 require 'db.php';
 
-// If not logged in and trying to log in
+$timeout_duration = 2*60;
+
+if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY']) > $timeout_duration) {
+    session_unset();     // clear session
+    session_destroy();   // destroy session
+    header("Location: index.php");
+    exit();
+}
+
+$_SESSION['LAST_ACTIVITY'] = time();
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_superadmin'])) {
     $email = trim($_POST['email']);
     $password = $_POST['password'];
@@ -19,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_superadmin'])) 
             exit();
         } else {
             $error = "Incorrect password.";
-            
+
         }
     } else {
         $error = "Superadmin not found.";
@@ -450,3 +460,8 @@ if (isset($_SESSION['superadmin'])) {
 
 </body>
 </html>
+<script>
+  setTimeout(() => {
+    window.location.reload();
+  }, 40000); //ms
+</script>

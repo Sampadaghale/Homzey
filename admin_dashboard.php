@@ -2,7 +2,8 @@
 session_start();
 if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
     header('login.php');
-    echo   "login gar";
+
+    echo"<a href='login.php'>login gar</a>";
     exit();
 }
 
