@@ -21,9 +21,10 @@
         <label for="role">Role</label>
         <select name="role" id="role" required>
           <option value="">-- Select Role --</option>
-          <option value="1">Tenant</option>
-          <option value="2">Landlord</option>
-          <option value="3">Admin</option>
+          <option value="tenant">Tenant</option>
+          <option value="landlord">LandLord</option>
+
+          <!-- <option value="3">Admin</option> -->
         </select>
 
         <label for="homepage-signup-password">Password</label>

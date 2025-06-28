@@ -12,6 +12,10 @@ $successMessage = "";
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $title = trim($_POST["title"]);
+    $rooms = isset($_POST["rooms"]) ? intval($_POST["rooms"]) : null;
+$kitchen = isset($_POST["kitchen"]) ? intval($_POST["kitchen"]) : null;
+$bathroom = isset($_POST["bathroom"]) ? intval($_POST["bathroom"]) : null;
+$bhk = isset($_POST["bhk"]) ? trim($_POST["bhk"]) : null;
     $description = trim($_POST["description"]);
     $location = trim($_POST["location"]);
     $price = floatval($_POST["price"]);
@@ -47,9 +51,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
     if (empty($errorMessage)) {
-        $stmt = mysqli_prepare($conn, "INSERT INTO houses (landlord_id, title, description, location, price, image) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt = mysqli_prepare($conn, "INSERT INTO houses (landlord_id, title, description, location, price, image, rooms, kitchen, bathroom, bhk) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
         if ($stmt) {
-            mysqli_stmt_bind_param($stmt, "isssds", $_SESSION["user_id"], $title, $description, $location, $price, $imageName);
+           mysqli_stmt_bind_param($stmt, "isssdsiiis", $_SESSION["user_id"], $title, $description, $location, $price, $imageName, $rooms, $kitchen, $bathroom, $bhk);
             $executed = mysqli_stmt_execute($stmt);
 
             if ($executed) {
@@ -207,6 +212,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <form method="post" enctype="multipart/form-data">
     <label for="title">Title<span class="required">*</span></label>
     <input id="title" name="title" required />
+
+    <label for="rooms">Number of Rooms</label>
+<input id="rooms" name="rooms" type="number" min="0" />
+
+<label for="kitchen">Number of Kitchens</label>
+<input id="kitchen" name="kitchen" type="number" min="0" />
+
+<label for="bathroom">Number of Bathrooms</label>
+<input id="bathroom" name="bathroom" type="number" min="0" />
+
+<label for="bhk">BHK Type (e.g., 2BHK)</label>
+<input id="bhk" name="bhk" placeholder="e.g., 2BHK, 3BHK" />
+
 
     <label for="description">Description</label>
     <textarea id="description" name="description" rows="4"></textarea>

@@ -1,4 +1,12 @@
-<!DOCTYPE html>  
+<?php
+session_start();
+
+// Optionally show login error or success messages
+$login_error = $_SESSION['login_error'] ?? '';
+unset($_SESSION['login_error']);
+?>
+
+<!DOCTYPE html>   
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -12,10 +20,14 @@
     <div class="auth-forms">
       <section class="auth-card" aria-labelledby="login-title">
 
-  <!-- Logo Image -->
-  <div class="logo-container">
-    <img src="image/house.png" alt="Homzey Logo" class="auth-logo">
-  </div>
+        <!-- Logo Image -->
+        <div class="logo-container">
+          <a href="index.php"><img src="image/house.png" alt="Homzey Logo" class="auth-logo"></a>
+        </div>
+
+        <?php if ($login_error): ?>
+          <p style="color: red; text-align:center;"><?= htmlspecialchars($login_error) ?></p>
+        <?php endif; ?>
 
         <form action="login_process.php" method="post" novalidate aria-label="Login form">
           <label for="homepage-login-email">Email</label>
@@ -47,6 +59,8 @@
           </select>
 
           <button type="submit" aria-label="Submit login form">Login</button>
+
+          <p><a href="forgot_password.php">Forgot Password?</a></p>
 
           <p class="signup-link">
             Don't have an account? <a href="signup.php">Sign up here</a>

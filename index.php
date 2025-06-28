@@ -28,12 +28,12 @@ if ($result) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
 <body>
-<script src="script.js"></script>
 
 <header>
     <nav class="container nav-flex" aria-label="Primary Navigation">
         <div class="logo" tabindex="0">
-            <img src="image/house.png" alt="Homzey logo" />
+           <a href="index.php"><img src="image/house.png" alt="Homzey logo" />
+           </a>
         </div>
 
         <!-- SEARCH MOVED HERE -->
@@ -47,24 +47,47 @@ if ($result) {
             <a href="browse.php" tabindex="0">Browse</a>
             <a href="#about" tabindex="0">About</a>
             <a href="#contact" tabindex="0">Contact</a>
-
-            <?php if (isset($_SESSION['user_name'])): ?>
-                <div class="user-dropdown-container" aria-haspopup="true" aria-expanded="false">
-                    <button class="user-toggle" onclick="toggleDropdown()" aria-label="User menu">
-                        <span><?= htmlspecialchars($_SESSION['user_name']); ?></span>
-                        <i class="fa fa-caret-down" aria-hidden="true"></i>
-                    </button>
-                    <div id="userDropdown" class="user-dropdown hidden" role="menu" aria-label="User Menu">
-                        <strong class="user-name" role="presentation"><?= htmlspecialchars($_SESSION['user_name']); ?></strong>
-                        <?php if ($_SESSION['user_role'] === 'tenant'): ?>
-                            <a href="tenant_dashboard.php" class="account-button booking-btn" role="menuitem">My Bookings</a>
-                        <?php endif; ?>
-                        <a href="logout.php" class="account-button logout-btn" role="menuitem">Logout</a>
-                    </div>
-                </div>
-            <?php else: ?>
-                <a href="login.php" style="color:black;" tabindex="0" aria-label="Login page">Login</a>
+            
+            <?php if (!isset($_SESSION['user_name'])): ?>
+                     <a href="login.php" tabindex="0" class="login">Login</a>
             <?php endif; ?>
+
+            <!-- <a href="login.php" tabindex="0">Login</a> -->
+            <?php if (isset($_SESSION['user_name'])): ?>
+    <div class="user-dropdown-container">
+        <button class="user-toggle" onclick="toggleDropdown()">
+            <span><?= htmlspecialchars($_SESSION['user_name']); ?></span>
+            <i class="fa fa-caret-down"></i>
+        </button>
+        <div id="userDropdown" class="user-dropdown hidden">
+            <strong class="user-name"><?= htmlspecialchars($_SESSION['user_name']); ?></strong>
+
+            <!-- Dashboard Button with Role-Based Redirect -->
+            <?php if ($_SESSION['user_role'] === 'admin'): ?>
+                <a href="admin_dashboard.php" class="account-button dashboard-btn">
+                    <i class="fa fa-user-shield"></i> Admin Dashboard
+                </a>
+            <?php elseif ($_SESSION['user_role'] === 'tenant'): ?>
+                <a href="tenant_dashboard.php" class="account-button dashboard-btn">
+                    <i class="fa fa-home"></i> Tenant Dashboard
+                </a>
+                <a href="mybooking.php#bookings" class="account-button booking-btn">
+                    <i class="fa fa-calendar-check"></i> My Bookings
+                </a>
+            <?php elseif ($_SESSION['user_role'] === 'landlord'): ?>
+                <a href="landlord_dashboard.php" class="account-button dashboard-btn">
+                    <i class="fa fa-building"></i> Landlord Dashboard
+                </a>
+            <?php endif; ?>
+
+            <!-- Logout Button -->
+            <a href="logout.php" class="account-button logout-btn">
+                <i class="fa fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </div>
+<?php endif; ?>
+
         </div>
     </nav>
 </header>
@@ -85,23 +108,45 @@ if ($result) {
             </button>
         </div>
     </section>
-
-    <section class="browse" aria-labelledby="browse-title" id="browse">
-        <h2 id="browse-title">Browse Our Rentals</h2>
-        <div class="browse-grid" role="list">
-            <?php foreach ($houses as $house): ?>
-                <article class="property-card" role="listitem" tabindex="0" aria-label="<?= htmlspecialchars($house['title']) . ' in ' . htmlspecialchars($house['location']) . ' for $' . htmlspecialchars($house['price']) . ' per month'; ?>">
-                   <img class="property-image" src="images/<?= htmlspecialchars($house['image']); ?>" alt="<?= htmlspecialchars($house['title']); ?>" />
-                    <div class="property-info">
-                        <h3 class="property-title"><?= htmlspecialchars($house['title']); ?></h3>
-                        <p class="property-location"><?= htmlspecialchars($house['location']); ?></p>
-                        <p class="property-price">Rs<?= htmlspecialchars($house['price']); ?> / month</p>
-                        <a href="details.php?id=<?= $house['id']; ?>" class="btn btn-primary" aria-label="View details of <?= htmlspecialchars($house['title']); ?>">View Details</a>
-                    </div>
-                </article>
+<section class="browse" aria-labelledby="browse-title" id="browse">   
+  <h2 id="browse-title">Browse Our Rentals</h2>
+  <div class="browse-grid" role="list">
+    <?php foreach ($houses as $house): 
+      $imageList = explode(',', $house['image']);
+      $imageList = array_map('trim', $imageList);
+      $imageList = array_slice($imageList, 0, 4); // Limit to max 4 images
+      $sliderId = "slider_" . $house['id'];
+    ?>
+      <article class="property-card" role="listitem" tabindex="0" aria-label="<?= htmlspecialchars($house['title']) . ' in ' . htmlspecialchars($house['location']) . ' for Rs' . htmlspecialchars($house['price']) . ' per month'; ?>">
+        <div class="slider" id="<?= $sliderId ?>">
+          <div class="slider-images">
+            <?php foreach ($imageList as $img): ?>
+              <img src="images/<?= htmlspecialchars($img); ?>" alt="<?= htmlspecialchars($house['title']); ?>" />
             <?php endforeach; ?>
+          </div>
+
+          <?php if(count($imageList) > 1): ?>
+            <button class="slider-btn prev" onclick="slidePrev('<?= $sliderId ?>')" aria-label="Previous image">&#10094;</button>
+            <button class="slider-btn next" onclick="slideNext('<?= $sliderId ?>')" aria-label="Next image">&#10095;</button>
+
+            <div class="slider-dots">
+              <?php foreach ($imageList as $index => $img): ?>
+                <span class="slider-dot" onclick="goToSlide('<?= $sliderId ?>', <?= $index ?>)" aria-label="Go to image <?= $index + 1 ?>"></span>
+              <?php endforeach; ?>
+            </div>
+          <?php endif; ?>
         </div>
-    </section>
+
+        <div class="property-info">
+          <h3 class="property-title"><?= htmlspecialchars($house['title']); ?></h3>
+          <p class="property-location"><?= htmlspecialchars($house['location']); ?></p>
+          <p class="property-price">Rs<?= htmlspecialchars($house['price']); ?> / month</p>
+          <a href="details.php?id=<?= $house['id']; ?>" class="btn btn-primary" aria-label="View details of <?= htmlspecialchars($house['title']); ?>">View Details</a>
+        </div>
+      </article>
+    <?php endforeach; ?>
+  </div>
+</section>
 
     <section class="features" aria-labelledby="features-title">
         <h2 id="features-title">Why Choose HouseRent?</h2>
@@ -214,6 +259,7 @@ if ($result) {
 <footer>
     &copy; 2025 Homzey. All rights reserved.
 </footer>
+<script src="script.js"></script>
 
 </body>
 </html>

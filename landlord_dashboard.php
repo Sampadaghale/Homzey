@@ -1,4 +1,4 @@
-<?php    
+<?php
 session_start();
 include 'db.php'; // expects $conn = mysqli_connect(...)
 
@@ -8,6 +8,12 @@ if (!isset($_SESSION["user_id"]) || $_SESSION["user_role"] !== "landlord") {
 }
 
 $user_id = $_SESSION["user_id"];
+
+// Optional: show success/error message after booking action
+$msg = '';
+if (isset($_GET['msg'])) {
+    $msg = htmlspecialchars($_GET['msg']);
+}
 
 // Fetch landlord's name
 $name = "";
@@ -19,7 +25,7 @@ mysqli_stmt_bind_result($stmt, $name);
 mysqli_stmt_fetch($stmt);
 mysqli_stmt_close($stmt);
 
-// Fetch landlord's houses
+// Fetch landlord's houses (including is_approved field)
 $sql = "SELECT * FROM houses WHERE landlord_id = ?";
 $stmt = mysqli_prepare($conn, $sql);
 mysqli_stmt_bind_param($stmt, "i", $user_id);
@@ -97,6 +103,7 @@ mysqli_stmt_close($stmt);
       border: 1px solid #ddd;
       padding: 10px;
       text-align: left;
+      vertical-align: middle;
     }
     th {
       background-color: #4CAF50;
@@ -137,15 +144,22 @@ mysqli_stmt_close($stmt);
       background-color: #717171;
     }
     .btn {
+      cursor: pointer;
       background: #4CAF50;
       color: white;
-      text-decoration: none;
+      border: none;
       padding: 6px 12px;
       border-radius: 4px;
       font-size: 14px;
+      margin-right: 5px;
+      display: inline-block;
+      text-decoration: none;
     }
     .btn.delete {
       background: #dc3545;
+    }
+    .btn:hover {
+      opacity: 0.9;
     }
     .status-confirmed {
       color: green;
@@ -155,19 +169,47 @@ mysqli_stmt_close($stmt);
       color: red;
       font-weight: bold;
     }
+    .approved {
+      color: green;
+      font-weight: bold;
+    }
+    .pending-approval {
+      color: orange;
+      font-weight: bold;
+    }
+    /* Smaller buttons for booking actions */
+    form.booking-action-form button {
+      font-size: 12px;
+      padding: 4px 8px;
+      margin-left: 5px;
+    }
+    /* Success message */
+    .message {
+      background: #d4edda;
+      color: #155724;
+      padding: 10px;
+      margin: 20px auto;
+      width: 90%;
+      border-radius: 5px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
 
 <header>
   <div class="logo">
-    <img src="image/house.png" alt="Logo"> 
+    <a href="index.php"><img src="image/house.png" alt="Logo"> </a>
   </div>
   <nav>
     <a href="add_listing.php">Add Listing</a>
     <a href="logout.php">Logout</a>
   </nav>
 </header>
+
+<?php if ($msg): ?>
+  <div class="message"><?= $msg ?></div>
+<?php endif; ?>
 
 <h1>Welcome, <?= htmlspecialchars($name); ?>!</h1>
 
@@ -180,6 +222,7 @@ mysqli_stmt_close($stmt);
         <th>Title</th>
         <th>Location</th>
         <th>Price</th>
+        <th>Approved</th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -204,13 +247,20 @@ mysqli_stmt_close($stmt);
             <td><?= htmlspecialchars($house['location']); ?></td>
             <td>Rs<?= htmlspecialchars($house['price']); ?></td>
             <td>
+              <?php if (!empty($house['is_approved']) && $house['is_approved'] == 1): ?>
+                <span class="approved">Approved</span>
+              <?php else: ?>
+                <span class="pending-approval">Pending</span>
+              <?php endif; ?>
+            </td>
+            <td>
               <a href="edit_listing.php?id=<?= $house['id']; ?>" class="btn">Edit</a>
               <a href="delete_listing.php?id=<?= $house['id']; ?>" class="btn delete" onclick="return confirm('Are you sure to delete this listing?');">Delete</a>
             </td>
           </tr>
         <?php endforeach; ?>
       <?php else: ?>
-        <tr><td colspan="5">No listings found.</td></tr>
+        <tr><td colspan="6">No listings found.</td></tr>
       <?php endif; ?>
     </tbody>
   </table>
@@ -228,7 +278,7 @@ mysqli_stmt_close($stmt);
         <th>Start Date</th>
         <th>End Date</th>
         <th>Total Price</th>
-        <th>Status</th>
+        <th>Status / Actions</th>
       </tr>
     </thead>
     <tbody>
@@ -248,6 +298,13 @@ mysqli_stmt_close($stmt);
             <td>Rs<?= htmlspecialchars($booking['total_price']); ?></td>
             <td class="status-<?= strtolower(htmlspecialchars($booking['status'])); ?>">
               <?= htmlspecialchars(ucfirst($booking['status'])); ?>
+              <?php if ($booking['status'] === 'pending'): ?>
+                <form action="handle_booking_action.php" method="post" class="booking-action-form" style="display:inline-block; margin-left:10px;">
+                  <input type="hidden" name="booking_id" value="<?= $booking['id'] ?>">
+                  <button type="submit" name="action" value="accept" class="btn">Accept</button>
+                  <button type="submit" name="action" value="reject" class="btn delete">Reject</button>
+                </form>
+              <?php endif; ?>
             </td>
           </tr>
         <?php endforeach; ?>

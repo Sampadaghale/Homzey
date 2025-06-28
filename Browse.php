@@ -39,6 +39,24 @@ if ($result) {
 <link rel="stylesheet" href="browse.css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 <style>
+  .browse {
+  margin-top: 0.5rem; /* small gap, adjust to 0 or a bit more as needed */
+  padding-top: 0.5rem; /* reduce any padding if present */
+}
+
+/* Also check if <main> has margin or padding and reduce it */
+main {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+  .browse h1,
+.browse p {
+  text-align: center;
+  margin-top: 0;
+  padding-top: 0.5rem
+}
+
   .badge-booked {
     background-color: #ef4444;
     color: white;
@@ -109,11 +127,14 @@ if ($result) {
   }
 
   .browse-grid {
-    display: grid;
-    gap: 2rem;
-    padding: 2rem;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  }
+  display: grid;
+  gap: 2rem;
+  padding: 2rem;
+  /* change this: */
+  grid-template-columns: repeat(auto-fit, minmax(300px, max-content));
+  justify-content: center; /* center the grid items horizontally */
+}
+
 
   .btn-disabled {
     background-color: #999;
@@ -133,7 +154,7 @@ if ($result) {
 <header>
     <nav class="container nav-flex">
         <div class="logo">
-            <img src="image/house.png" alt="Homzey logo" />
+            <a href="index.php"><img src="image/house.png" alt="Homzey logo" /></a>
         </div>
 
         <form action="browse.php" method="get" class="search-form">
@@ -146,22 +167,39 @@ if ($result) {
             <a href="browse.php">Browse</a>
 
             <?php if (isset($_SESSION['user_name'])): ?>
-                <div class="user-dropdown-container">
-                    <button class="user-toggle" onclick="toggleDropdown()">
-                        <span><?= htmlspecialchars($_SESSION['user_name']); ?></span>
-                        <i class="fa fa-caret-down"></i>
-                    </button>
-                    <div id="userDropdown" class="user-dropdown hidden">
-                        <strong class="user-name"><?= htmlspecialchars($_SESSION['user_name']); ?></strong>
-                        <?php if ($_SESSION['user_role'] === 'tenant'): ?>
-                            <a href="tenant_dashboard.php" class="account-button booking-btn">My Bookings</a>
-                        <?php endif; ?>
-                        <a href="logout.php" class="account-button logout-btn">Logout</a>
-                    </div>
-                </div>
-            <?php else: ?>
-                <a href="login.php">Login</a>
+    <div class="user-dropdown-container">
+        <button class="user-toggle" onclick="toggleDropdown()">
+            <span><?= htmlspecialchars($_SESSION['user_name']); ?></span>
+            <i class="fa fa-caret-down"></i>
+        </button>
+        <div id="userDropdown" class="user-dropdown hidden">
+            <strong class="user-name"><?= htmlspecialchars($_SESSION['user_name']); ?></strong>
+
+            <!-- Dashboard Button with Role-Based Redirect -->
+            <?php if ($_SESSION['user_role'] === 'admin'): ?>
+                <a href="admin_dashboard.php" class="account-button dashboard-btn">
+                    <i class="fa fa-user-shield"></i> Admin Dashboard
+                </a>
+            <?php elseif ($_SESSION['user_role'] === 'tenant'): ?>
+                <a href="tenant_dashboard.php" class="account-button dashboard-btn">
+                    <i class="fa fa-home"></i> Tenant Dashboard
+                </a>
+                <a href="tenant_dashboard.php#bookings" class="account-button booking-btn">
+                    <i class="fa fa-calendar-check"></i> My Bookings
+                </a>
+            <?php elseif ($_SESSION['user_role'] === 'landlord'): ?>
+                <a href="landlord_dashboard.php" class="account-button dashboard-btn">
+                    <i class="fa fa-building"></i> Landlord Dashboard
+                </a>
             <?php endif; ?>
+
+            <!-- Logout Button -->
+            <a href="logout.php" class="account-button logout-btn">
+                <i class="fa fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </div>
+<?php endif; ?>
         </div>
     </nav>
 </header>
