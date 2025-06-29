@@ -153,6 +153,11 @@ if (isset($_GET["id"]) && is_numeric($_GET["id"])) {
                     <p><strong>Description:</strong> <?= nl2br(htmlspecialchars($row["description"])) ?></p>
                     <p><strong>Location:</strong> <?= htmlspecialchars($row["location"]) ?></p>
                     <p><strong>Price:</strong> Rs<?= htmlspecialchars($row["price"]) ?> / month</p>
+                    <p><strong>Number of Rooms:</strong> <?= htmlspecialchars($row["rooms"]) ?></p>
+<p><strong>Number of Kitchens:</strong> <?= htmlspecialchars($row["kitchens"]) ?></p>
+<p><strong>Number of Bathrooms:</strong> <?= htmlspecialchars($row["bathrooms"]) ?></p>
+<p><strong>BHK:</strong> <?= htmlspecialchars($row["bhk"]) ?></p>
+
 
                     <?php if ($row["status"] === "booked"): ?>
                         <button class="btn-primary btn-disabled" disabled>This property is already booked</button>

@@ -43,6 +43,11 @@ CREATE TABLE bookings (
     address VARCHAR(255) NOT NULL,
     phone VARCHAR(20) NOT NULL
 );
+
+ALTER TABLE bookings
+ADD COLUMN notes TEXT,
+ADD COLUMN ref_code VARCHAR(100);
+
 CREATE TABLE reviews (
     id INT AUTO_INCREMENT PRIMARY KEY,
     house_id INT NOT NULL,
@@ -65,3 +70,30 @@ CREATE TABLE maintenance_requests (
     FOREIGN KEY (tenant_id) REFERENCES users(id),
     FOREIGN KEY (house_id) REFERENCES houses(id)
 );
+
+CREATE TABLE notifications (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,              -- Which user this notification belongs to
+    type VARCHAR(50) NOT NULL,         -- e.g., 'maintenance_update', 'payment_due', etc.
+    message TEXT NOT NULL,             -- Notification message content
+    link VARCHAR(255),                 -- Optional URL to related page (like maintenance details)
+    is_read BOOLEAN DEFAULT FALSE,    -- Mark if notification has been read
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE rent_payments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    due_date DATE NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    status ENUM('paid', 'due', 'overdue') DEFAULT 'due',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (tenant_id) REFERENCES users(id)
+);
+
+ALTER TABLE rent_payments
+ADD COLUMN booking_id INT NULL,
+ADD FOREIGN KEY (booking_id) REFERENCES bookings(id);
+
+
