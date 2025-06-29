@@ -365,8 +365,8 @@ $stmt->close();
         <ul class="nav-menu">
             <li><a href="#" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
             <li><a href="rent_payments.php"><i class="fas fa-file-invoice-dollar"></i> Rent Payments</a></li>
-            <li><a href="#"><i class="fas fa-tools"></i> Maintenance</a></li>
-            <li><a href="#"><i class="fas fa-envelope"></i> Messages</a></li>
+            <li><a href="maintenance.php"><i class="fas fa-tools"></i> Maintenance</a></li>
+            <li><a href="message.php"><i class="fas fa-envelope"></i> Messages</a></li>
             <li><a href="#"><i class="fas fa-file-signature"></i> Lease Documents</a></li>
             <li><a href="#"><i class="fas fa-cog"></i> Settings</a></li>
             <li><a href="index.php"><i class="fas fa-sign-out-alt"></i> Home</a></li>
