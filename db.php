@@ -1,14 +1,12 @@
-<?php 
-//$host = 'localhost';
-$host='localhost'; 
-$port='3306';
-
+<?php  
+$host = 'localhost'; 
+$port = '3307';
 
 $db = 'houserent';
-$user = 'root';  // change if needed
-$pass = '';      // update with your DB password
+$user = 'root';
+$pass = '';
 
-$conn = new mysqli($host, $user, $pass, $db);
+$conn = new mysqli($host, $user, $pass, $db, (int)$port);
 
 if ($conn->connect_error) {
     die("Database connection failed: " . $conn->connect_error);

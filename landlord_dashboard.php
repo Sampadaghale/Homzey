@@ -82,6 +82,9 @@ mysqli_stmt_close($stmt);
     }
     nav a:hover {
       text-decoration: underline;
+      color: #111827;
+      background-color: #fcf7f8;
+      outline: none;
     }
     h1 {
       text-align: center;
@@ -106,7 +109,7 @@ mysqli_stmt_close($stmt);
       vertical-align: middle;
     }
     th {
-      background-color: #4CAF50;
+      background-color: #102542;
       color: white;
     }
     .slider {
@@ -145,7 +148,7 @@ mysqli_stmt_close($stmt);
     }
     .btn {
       cursor: pointer;
-      background: #4CAF50;
+      background: #102542;
       color: white;
       border: none;
       padding: 6px 12px;

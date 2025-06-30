@@ -72,7 +72,7 @@ $stmt->close();
     <style>
         /* Your CSS from the code you provided, fully included */
         :root {
-            --primary-color: #4a6fa5;
+            --primary-color: #102542;
             --secondary-color: #166088;
             --accent-color: #4fc3f7;
             --background-color: #f5f7fa;
