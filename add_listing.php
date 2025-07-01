@@ -114,6 +114,9 @@ $bhk = isset($_POST["bhk"]) ? trim($_POST["bhk"]) : null;
 
         header nav a:hover {
             text-decoration: underline;
+            color: #111827;
+      background-color: #fcf7f8;
+      outline: none;
         }
 
         h1 {
