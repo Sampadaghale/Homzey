@@ -91,9 +91,9 @@ mysqli_stmt_close($stmt);
       margin: 20px 0;
     }
     section {
-      margin: 20px;
+      margin: 30px;
       background: white;
-      padding: 20px 30px;
+      padding: 20px 200px;
       border-radius: 6px;
       box-shadow: 0 0 10px rgb(0 0 0 / 0.1);
     }
@@ -109,7 +109,7 @@ mysqli_stmt_close($stmt);
       vertical-align: middle;
     }
     th {
-      background-color: #102542;
+      background-color:rgb(50, 16, 66);
       color: white;
     }
     .slider {

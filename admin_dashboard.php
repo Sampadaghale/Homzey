@@ -95,17 +95,17 @@ $bookingsRes = $conn->query("
         margin-bottom: 1rem;
     }
     .summary-total { background-color: #0d6efd; }
-    .summary-booked { background-color: #dc3545; }
+    .summary-booked { background-color:rgb(162, 53, 220); }
     .summary-available { background-color: #198754; }
-    .summary-pending { background-color: #ffc107; color: #212529; }
+    .summary-pending { background-color: #ffc107; color:rgb(33, 33, 41); }
     .summary-users { background-color: #6610f2; }
-    .summary-blocked { background-color: #6c757d; }
+    .summary-blocked { background-color:rgb(114, 108, 125); }
     .summary-bookings { background-color: #20c997; }
     .summary-pending-bookings { background-color: #fd7e14; }
 
     .house-image {
-        width: 120px;
-        height: 80px;
+        width: 140px;
+        height: px90;
         object-fit: cover;
         border-radius: 6px;
     }
