@@ -1,13 +1,13 @@
 <?php
 session_start();
-include 'db.php';
+include '../Main/db.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-require 'PHPMailer/PHPMailer.php';
-require 'PHPMailer/SMTP.php';
-require 'PHPMailer/Exception.php';
+require '../PHPMailer/PHPMailer.php';
+require '../PHPMailer/SMTP.php';
+require '../PHPMailer/Exception.php';
 
 // Only landlords allowed here
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'landlord') {
@@ -118,7 +118,7 @@ Homzey Team";
     }
 
     // Redirect back to landlord dashboard with message (optional)
-    header("Location: landlord_dashboard.php?msg=Booking+{$new_status}");
+    header("Location: landlord/landlord_dashboard.php?msg=Booking+{$new_status}");
     exit();
 } else {
     die('Invalid request method.');

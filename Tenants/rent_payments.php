@@ -1,6 +1,6 @@
 <?php 
 session_start();
-require 'db.php';
+include '../Main/db.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'tenant') {
     header('Location: login.php');
@@ -169,7 +169,7 @@ foreach ($bookings as $booking) {
     main {
         padding: 2rem;
         max-width: 900px;
-        margin: auto;
+        margin: 0;
     }
     h2.section-title {
         border-bottom: 2px solid var(--primary-color);
@@ -257,9 +257,6 @@ foreach ($bookings as $booking) {
             <li><a href="tenant_dashboard.php"><i class="fas fa-home"></i> Dashboard</a></li>
             <li><a href="rent_payments.php" class="active"><i class="fas fa-file-invoice-dollar"></i> Payment Tracking</a></li>
             <li><a href="maintenance.php"><i class="fas fa-tools"></i> Maintenance</a></li>
-            <li><a href="messages.php"><i class="fas fa-envelope"></i> Messages</a></li>
-            <li><a href="lease_documents.php"><i class="fas fa-file-signature"></i> Lease Documents</a></li>
-            <li><a href="settings.php"><i class="fas fa-cog"></i> Settings</a></li>
             <li><a href="logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
         </ul>
     </aside>

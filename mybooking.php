@@ -1,6 +1,6 @@
 <?php   
 session_start();
-require 'db.php';
+require 'Main/db.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'tenant') {
     header('Location: login.php');
@@ -130,8 +130,8 @@ mysqli_stmt_close($stmt);
 <header>
   <h1>Tenant Dashboard</h1>
   <nav>
-    <a href="index.php">Home</a>
-    <a href="logout.php">Logout</a>
+    <a href="Main/index.php">Home</a>
+    <a href="Main/logout.php">Logout</a>
   </nav>
 </header>
 

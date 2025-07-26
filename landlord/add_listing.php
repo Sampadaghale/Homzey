@@ -1,6 +1,6 @@
-<?php   
+<?php    
 session_start();
-require 'db.php'; // $conn (MySQLi connection)
+require '../Main/db.php'; // $conn (MySQLi connection)
 
 if (!isset($_SESSION["user_id"]) || $_SESSION["user_role"] !== "landlord") {
     header("Location:login.php");
@@ -13,18 +13,18 @@ $successMessage = "";
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $title = trim($_POST["title"]);
     $rooms = isset($_POST["rooms"]) ? intval($_POST["rooms"]) : null;
-$kitchen = isset($_POST["kitchen"]) ? intval($_POST["kitchen"]) : null;
-$bathroom = isset($_POST["bathroom"]) ? intval($_POST["bathroom"]) : null;
-$bhk = isset($_POST["bhk"]) ? trim($_POST["bhk"]) : null;
+    $kitchen = isset($_POST["kitchen"]) ? intval($_POST["kitchen"]) : null;
+    $bathroom = isset($_POST["bathroom"]) ? intval($_POST["bathroom"]) : null;
+    $bhk = isset($_POST["bhk"]) ? trim($_POST["bhk"]) : null;
     $description = trim($_POST["description"]);
     $location = trim($_POST["location"]);
     $price = floatval($_POST["price"]);
-    $imageName = "default_house.jpg"; // fallback
+    $imageName = "default_house.jpg";
     $imageNames = [];
 
     if (!empty($_FILES["images"]["name"][0])) {
         $allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
-        $targetDir = __DIR__ . "/images/";
+        $targetDir = dirname(__DIR__) . "/images/"; // ✅ corrected path
 
         if (!is_dir($targetDir)) {
             mkdir($targetDir, 0755, true);
@@ -54,11 +54,11 @@ $bhk = isset($_POST["bhk"]) ? trim($_POST["bhk"]) : null;
         $stmt = mysqli_prepare($conn, "INSERT INTO houses (landlord_id, title, description, location, price, image, rooms, kitchen, bathroom, bhk) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
         if ($stmt) {
-           mysqli_stmt_bind_param($stmt, "isssdsiiis", $_SESSION["user_id"], $title, $description, $location, $price, $imageName, $rooms, $kitchen, $bathroom, $bhk);
+            mysqli_stmt_bind_param($stmt, "isssdsiiis", $_SESSION["user_id"], $title, $description, $location, $price, $imageName, $rooms, $kitchen, $bathroom, $bhk);
             $executed = mysqli_stmt_execute($stmt);
 
             if ($executed) {
-                $successMessage = "Listing added But Requires Admin Approval!";
+                $successMessage = "Listing added but requires admin approval!";
             } else {
                 $errorMessage = "Database error: could not add listing.";
             }
@@ -76,6 +76,11 @@ $bhk = isset($_POST["bhk"]) ? trim($_POST["bhk"]) : null;
 <head>
     <meta charset="UTF-8" />
     <title>Add Listing - Landlord</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+  />
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -84,25 +89,17 @@ $bhk = isset($_POST["bhk"]) ? trim($_POST["bhk"]) : null;
             color: #111827;
         }
 
-        /* Header */
         header {
             background: white;
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 1rem 2rem;
-            color: #fff;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        header .logo {
-            display: flex;
-            align-items: center;
-        }
-
         header .logo img {
-              width: 60px;
-  height: auto;
+            width: 60px;
         }
 
         header nav a {
@@ -115,14 +112,11 @@ $bhk = isset($_POST["bhk"]) ? trim($_POST["bhk"]) : null;
         header nav a:hover {
             text-decoration: underline;
             color: #111827;
-      background-color: #fcf7f8;
-      outline: none;
         }
 
         h1 {
             text-align: center;
             margin: 2rem 0 1rem;
-            color: #1f2937;
         }
 
         form {
@@ -147,10 +141,6 @@ $bhk = isset($_POST["bhk"]) ? trim($_POST["bhk"]) : null;
             border: 1px solid #ccc;
             border-radius: 6px;
             font-size: 1rem;
-        }
-
-        input[type="file"] {
-            padding: 0.3rem;
         }
 
         button {
@@ -194,15 +184,7 @@ $bhk = isset($_POST["bhk"]) ? trim($_POST["bhk"]) : null;
     </style>
 </head>
 <body>
-    <header>
-        <div class="logo">
-            <img src="image/house.png" alt="Homzey Logo">
-        </div>
-        <nav>
-            <a href="landlord_dashboard.php">Dashboard</a>
-            <a href="logout.php">Logout</a>
-        </nav>
-    </header>
+   <?php include 'sidebar.php'; ?>
 
     <h1>Add New House Listing</h1>
 
@@ -213,35 +195,34 @@ $bhk = isset($_POST["bhk"]) ? trim($_POST["bhk"]) : null;
     <?php endif; ?>
 
     <form method="post" enctype="multipart/form-data">
-    <label for="title">Title<span class="required">*</span></label>
-    <input id="title" name="title" required />
+        <label for="title">Title<span class="required">*</span></label>
+        <input id="title" name="title" required />
 
-    <label for="rooms">Number of Rooms</label>
-<input id="rooms" name="rooms" type="number" min="0" />
+        <label for="rooms">Number of Rooms</label>
+        <input id="rooms" name="rooms" type="number" min="0" />
 
-<label for="kitchen">Number of Kitchens</label>
-<input id="kitchen" name="kitchen" type="number" min="0" />
+        <label for="kitchen">Number of Kitchens</label>
+        <input id="kitchen" name="kitchen" type="number" min="0" />
 
-<label for="bathroom">Number of Bathrooms</label>
-<input id="bathroom" name="bathroom" type="number" min="0" />
+        <label for="bathroom">Number of Bathrooms</label>
+        <input id="bathroom" name="bathroom" type="number" min="0" />
 
-<label for="bhk">BHK Type (e.g., 2BHK)</label>
-<input id="bhk" name="bhk" placeholder="e.g., 2BHK, 3BHK" />
+        <label for="bhk">BHK Type (e.g., 2BHK)</label>
+        <input id="bhk" name="bhk" placeholder="e.g., 2BHK, 3BHK" />
 
+        <label for="description">Description</label>
+        <textarea id="description" name="description" rows="4"></textarea>
 
-    <label for="description">Description</label>
-    <textarea id="description" name="description" rows="4"></textarea>
+        <label for="location">Location<span class="required">*</span></label>
+        <input id="location" name="location" required />
 
-    <label for="location">Location<span class="required">*</span></label>
-    <input id="location" name="location" required />
+        <label for="price">Price (Rs per month)<span class="required">*</span></label>
+        <input id="price" name="price" type="number" step="0.01" min="0" required />
 
-    <label for="price">Price (Rs per month)<span class="required">*</span></label>
-    <input id="price" name="price" type="number" step="0.01" min="0" required />
+        <label for="images">House Images (JPG, PNG, WEBP)</label>
+        <input id="images" name="images[]" type="file" accept="image/jpeg,image/png,image/webp" multiple>
 
-    <label for="images">House Images (JPG, PNG, WEBP)</label>
-   <input id="images" name="images[]" type="file" accept="image/jpeg,image/png,image/webp" multiple>
-
-    <button type="submit">Add Listing</button>
-</form>
+        <button type="submit">Add Listing</button>
+    </form>
 </body>
 </html>

@@ -96,4 +96,14 @@ ALTER TABLE rent_payments
 ADD COLUMN booking_id INT NULL,
 ADD FOREIGN KEY (booking_id) REFERENCES bookings(id);
 
+CREATE TABLE maintenance_requests (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    house_id INT,
+    tenant_id INT,
+    description TEXT,
+    status ENUM('pending', 'in progress', 'completed') DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (house_id) REFERENCES houses(id),
+    FOREIGN KEY (tenant_id) REFERENCES users(id)
+);
 

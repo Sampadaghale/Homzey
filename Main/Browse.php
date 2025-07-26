@@ -40,11 +40,11 @@ if ($result) {
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 <style>
   .browse {
-  margin-top: 0.5rem; /* small gap, adjust to 0 or a bit more as needed */
-  padding-top: 0.5rem; /* reduce any padding if present */
+  margin-top: 0.5rem; 
+  padding-top: 0.5rem; 
 }
 
-/* Also check if <main> has margin or padding and reduce it */
+
 main {
   margin-top: 0;
   padding-top: 0;
@@ -154,7 +154,7 @@ main {
 <header>
     <nav class="container nav-flex">
         <div class="logo">
-            <a href="index.php"><img src="image/house.png" alt="Homzey logo" /></a>
+            <a href="index.php"><img src="../image/house.png" alt="Homzey logo" /></a>
         </div>
 
         <form action="browse.php" method="get" class="search-form">
@@ -165,6 +165,10 @@ main {
         <div class="nav-links">
             <a href="index.php">Home</a>
             <a href="browse.php">Browse</a>
+
+             <?php if (!isset($_SESSION['user_name'])): ?>
+                     <a href="login.php" tabindex="0" class="login">Login</a>
+            <?php endif; ?>
 
             <?php if (isset($_SESSION['user_name'])): ?>
     <div class="user-dropdown-container">
@@ -226,7 +230,7 @@ main {
                         <div class="slider" id="<?= $sliderId ?>">
                             <div class="slider-images">
                                 <?php foreach ($imageList as $img): ?>
-                                    <img src="images/<?= htmlspecialchars($img); ?>" alt="<?= htmlspecialchars($house['title']); ?>">
+                                    <img src="/homzey/images/<?= htmlspecialchars($img); ?>" alt="<?= htmlspecialchars($house['title']); ?>">
                                 <?php endforeach; ?>
                             </div>
                             <?php if (count($imageList) > 1): ?>

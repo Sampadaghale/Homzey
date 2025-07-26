@@ -1,14 +1,14 @@
 <?php
 session_start();
-require 'db.php'; // Your MySQLi connection
+require '../Main/db.php'; // Your MySQLi connection
 
 // Load PHPMailer
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-require 'PHPMailer/PHPMailer.php';
-require 'PHPMailer/SMTP.php';
-require 'PHPMailer/Exception.php';
+require '../PHPMailer/PHPMailer.php';
+require '../PHPMailer/SMTP.php';
+require '../PHPMailer/Exception.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'tenant') {
     header('Location: login.php');
@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         // SMTP server configuration
                         // $mail->SMTPDebug = 2; // Enable verbose debug output for troubleshooting
                         $mail->isSMTP();
-                        $mail->Host       = 'smtp.example.com';           // Your SMTP server
+                        $mail->Host       = 'smtp.gmail.com';           // Your SMTP server
                         $mail->SMTPAuth   = true;
                         $mail->Username   = 'homzeyrent@gmail.com';     // SMTP username
                         $mail->Password   = 'yrvk pqxh hsxa stsk';              // SMTP password
@@ -97,8 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                         $mail->send();
                     } catch (Exception $e) {
-                        // Optional: log error or notify admin
-                        // error_log('Mailer Error: ' . $mail->ErrorInfo);
+                       
                     }
                 }
 
@@ -294,9 +293,6 @@ $stmt->close();
                 <li><a href="tenant_dashboard.php"><i class="fas fa-home"></i> Dashboard</a></li>
                 <li><a href="rent_payments.php"><i class="fas fa-file-invoice-dollar"></i> Rent Payments</a></li>
                 <li><a href="maintenance.php" class="active"><i class="fas fa-tools"></i> Maintenance</a></li>
-                <li><a href="messages.php"><i class="fas fa-envelope"></i> Messages</a></li>
-                <li><a href="lease_documents.php"><i class="fas fa-file-signature"></i> Lease Documents</a></li>
-                <li><a href="settings.php"><i class="fas fa-cog"></i> Settings</a></li>
                 <li><a href="logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>
         </aside>

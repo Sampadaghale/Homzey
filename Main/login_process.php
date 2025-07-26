@@ -31,10 +31,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     header('Location: index.php');
                     break;
                 case 'landlord':
-                    header('Location: landlord_dashboard.php');
+                    header('Location: ../landlord/landlord_dashboard.php');
                     break;
                 case 'admin':
-                    header('Location: admin_dashboard.php');
+                    header('Location: ../admin_dashboard.php');
                     break;
                 default:
                     header('Location: index.php');

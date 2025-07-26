@@ -1,14 +1,14 @@
 <?php
 session_start();
-require 'db.php';
+require '../Main/db.php';
 
 // Include PHPMailer
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-require 'PHPMailer/PHPMailer.php';
-require 'PHPMailer/SMTP.php';
-require 'PHPMailer/Exception.php';
+require '../PHPMailer/PHPMailer.php';
+require '../PHPMailer/SMTP.php';
+require '../PHPMailer/Exception.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'tenant') {
     header("Location: login.php");

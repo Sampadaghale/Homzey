@@ -1,6 +1,6 @@
 <?php 
 session_start();
-require 'db.php';
+require '../Main/db.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'tenant') {
     header('Location: login.php');
@@ -366,10 +366,7 @@ $stmt->close();
             <li><a href="#" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
             <li><a href="rent_payments.php"><i class="fas fa-file-invoice-dollar"></i> Rent Payments</a></li>
             <li><a href="maintenance.php"><i class="fas fa-tools"></i> Maintenance</a></li>
-            <li><a href="message.php"><i class="fas fa-envelope"></i> Messages</a></li>
-            <li><a href="#"><i class="fas fa-file-signature"></i> Lease Documents</a></li>
-            <li><a href="#"><i class="fas fa-cog"></i> Settings</a></li>
-            <li><a href="index.php"><i class="fas fa-sign-out-alt"></i> Home</a></li>
+            <li><a href="../Main/index.php"><i class="fas fa-home"></i> Home</a></li>
         </ul>
     </div>
 
@@ -391,7 +388,7 @@ $stmt->close();
                     <div class="card-icon"><i class="fas fa-home"></i></div>
                 </div>
                 <?php if ($house): ?>
-                    <img src="<?= htmlspecialchars($house['image']) ?>" alt="Property image" class="property-image" />
+                    <img src="<?= htmlspecialchars($house['image']) ?>" alt="images" class="property-image" />
                     <div class="detail-row"><span class="detail-label">Address:</span> <span class="detail-value"><?= htmlspecialchars($house['location']) ?></span></div>
                     <div class="detail-row"><span class="detail-label">Landlord:</span> <span class="detail-value"><?= htmlspecialchars($house['landlord_name']) ?></span></div>
                     <div class="detail-row"><span class="detail-label">Lease End:</span> <span class="detail-value"><?= date('F j, Y', strtotime($house['end_date'] ?? $house['lease_end_date'] ?? '')) ?></span></div>

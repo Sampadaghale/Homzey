@@ -1,17 +1,17 @@
 <?php
 session_start();
-include 'db.php';
+include '../Main/db.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-require 'PHPMailer/PHPMailer.php';
-require 'PHPMailer/SMTP.php';
-require 'PHPMailer/Exception.php';
+require '../PHPMailer/PHPMailer.php';
+require '../PHPMailer/SMTP.php';
+require '../PHPMailer/Exception.php';
 
-// Check if tenant is logged in
-if (!isset($_SESSION["user_id"]) || $_SESSION["user_role"] != "tenant") {
-    header("Location: login.php");
+// Ensure tenant is logged in and has correct role
+if (!isset($_SESSION["user_id"]) || $_SESSION["user_role"] !== "tenant") {
+    header("Location: ../Main/login.php");
     exit();
 }
 
@@ -27,19 +27,19 @@ $search = $_GET['search'] ?? '';
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Booking - Homzey</title>
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="../Main/styles.css" />
 </head>
 <body>
 <header>
     <nav class="container nav-flex">
-        <div class="logo"><img src="image/house.png" alt="Homzey logo" /></div>
+        <div class="logo"><img src="../image/house.png" alt="Homzey logo" /></div>
         <form action="browse.php" method="get" class="search-form">
             <input type="text" name="search" placeholder="Search by location, title or price" value="<?= htmlspecialchars($search); ?>" />
             <button type="submit">Search</button>
         </form>
         <div class="nav-links">
-            <a href="index.php">Home</a>
-            <a href="browse.php">Browse</a>
+            <a href="../Main/index.php">Home</a>
+            <a href="../Main/browse.php">Browse</a>
             <?php if (isset($_SESSION['user_name'])): ?>
                 <div class="user-dropdown-container">
                     <button class="user-toggle" onclick="toggleDropdown()">
@@ -48,12 +48,12 @@ $search = $_GET['search'] ?? '';
                     </button>
                     <div id="userDropdown" class="user-dropdown hidden">
                         <strong class="user-name"><?= htmlspecialchars($_SESSION['user_name']); ?></strong>
-                        <a href="tenant_dashboard.php" class="account-button booking-btn">My Bookings</a>
-                        <a href="logout.php" class="account-button logout-btn">Logout</a>
+                        <a href="../tenant_dashboard.php" class="account-button booking-btn">My Bookings</a>
+                        <a href="../Main/logout.php" class="account-button logout-btn">Logout</a>
                     </div>
                 </div>
             <?php else: ?>
-                <a href="login.php">Login</a>
+                <a href="../Main/login.php">Login</a>
             <?php endif; ?>
         </div>
     </nav>
@@ -80,7 +80,7 @@ if (!$house) {
 
 $imagePreview = explode(',', $house['image'])[0];
 echo '<div class="house-summary">';
-echo "<img src='images/" . htmlspecialchars(trim($imagePreview)) . "' alt='House Image' width='300'><br>";
+echo "<img src='/homzey/images/" . htmlspecialchars(trim($imagePreview)) . "' alt='House Image' width='300'><br>";
 echo "<strong>Location:</strong> " . htmlspecialchars($house['location']) . "<br>";
 echo "<strong>Monthly Price:</strong> Rs. " . htmlspecialchars($house['price']) . "<br><br>";
 echo "</div>";
@@ -98,6 +98,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         exit();
     }
 
+    // Check if already booked
     $checkBooking = $conn->prepare("SELECT id FROM bookings WHERE tenant_id = ? AND house_id = ?");
     $checkBooking->bind_param("ii", $tenant_id, $house_id);
     $checkBooking->execute();
@@ -116,7 +117,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     mysqli_stmt_close($stmt);
 
     if ($exec_success) {
-        $stmt3 = mysqli_prepare($conn, "SELECT name, email, phone FROM users WHERE id = ?");
+        $stmt3 = mysqli_prepare($conn, "SELECT name, email FROM users WHERE id = ?");
         mysqli_stmt_bind_param($stmt3, "i", $house['landlord_id']);
         mysqli_stmt_execute($stmt3);
         $landlord_result = mysqli_stmt_get_result($stmt3);
@@ -133,18 +134,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $mail->Password = 'yrvk pqxh hsxa stsk';
                 $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
                 $mail->Port = 587;
-                $mail->setFrom('homzeyrent@gmail.com', 'Homzey');
 
+                $mail->setFrom('homzeyrent@gmail.com', 'Homzey');
                 $mail->addAddress($landlord['email'], $landlord['name']);
                 $mail->Subject = "Booking Request Received - Ref: $ref_code";
                 $mail->Body =
                     "Hello {$landlord['name']},\n\nYou have received a booking request for your house '{$house['title']}'.\n\nReference Code: $ref_code\n\nTenant Info:\nName: $full_name\nAddress: $address\nPhone: $phone\n\nBooking Duration:\nStart Date: $start_date\nEnd Date: $end_date\nNotes: $notes\n\nPlease log in to your landlord dashboard to accept or reject this request.";
 
                 $mail->send();
-
                 echo "<p>Booking request sent! Please wait for landlord confirmation. Ref: <strong>$ref_code</strong></p>";
             } catch (Exception $e) {
-                echo "<p>Booking request saved, but email failed: {$mail->ErrorInfo}</p>";
+                echo "<p>Booking saved, but email failed: {$mail->ErrorInfo}</p>";
             }
         } else {
             echo "<p>Booking request saved. Email skipped due to missing addresses.</p>";
@@ -166,6 +166,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 }
 ?>
 </div>
+
 <script>
 function toggleDropdown() {
   const dropdown = document.getElementById("userDropdown");

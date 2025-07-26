@@ -1,6 +1,6 @@
 <?php
 session_start();
-require 'db.php';  // expects $conn = new mysqli(...);
+require '../Main/db.php';  // expects $conn = new mysqli(...);
 
 if (!isset($_SESSION["user_id"]) || $_SESSION["user_role"] !== "landlord") {
     header("Location: login.php");
@@ -95,7 +95,7 @@ if (isset($_GET["id"])) {
 <head>
   <meta charset="UTF-8" />
   <title>Edit Listing</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="../styles.css" />
 </head>
 <body>
   <section class="auth-section" aria-label="Edit listing form">

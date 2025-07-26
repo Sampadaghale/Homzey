@@ -7,7 +7,7 @@ if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
     exit();
 }
 
-$conn = new mysqli("localhost:3309", "root", "", "houserent");
+$conn = new mysqli("localhost:3306", "root", "", "houserent");
 if ($conn->connect_error) die("DB Connection failed: " . $conn->connect_error);
 
 //Counting all the details 
@@ -131,7 +131,7 @@ $bookingsRes = $conn->query("
 
     <!-- Right: Logout -->
     <div>
-        <a href="logout.php" class="btn btn-danger">Logout</a>
+        <a href="Main/logout.php" class="btn btn-danger">Logout</a>
         
     </div>
     
