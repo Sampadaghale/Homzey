@@ -118,148 +118,23 @@ foreach ($bookings as $booking) {
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Rent Payment Summary & Add Payment</title>
-<style>
-    :root {
-        --primary-color: #4a6fa5;
-        --secondary-color: #166088;
-        --background-color: #f5f7fa;
-        --text-dark: #333333;
-        --text-light: #666666;
-        --success-color: #43a047;
-        --warning-color: #ff9800;
-        --danger-color: #e53935;
-    }
-    body {
-        margin: 0;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: var(--background-color);
-        color: var(--text-dark);
-    }
-    .dashboard {
-        display: grid;
-        grid-template-columns: 250px 1fr;
-        min-height: 100vh;
-    }
-    .sidebar {
-        background-color: var(--primary-color);
-        color: white;
-        padding: 2rem 1rem;
-    }
-    .sidebar-header h2 {
-        margin-bottom: 1rem;
-    }
-    .nav-menu {
-        list-style: none;
-        padding: 0;
-    }
-    .nav-menu li {
-        margin: 1rem 0;
-    }
-    .nav-menu a {
-        color: white;
-        text-decoration: none;
-        display: block;
-        padding: 0.5rem;
-        border-radius: 4px;
-        transition: background-color 0.3s ease;
-    }
-    .nav-menu a.active, .nav-menu a:hover {
-        background-color: rgba(255, 255, 255, 0.2);
-    }
-    main {
-        padding: 2rem;
-        max-width: 900px;
-        margin: 0;
-    }
-    h2.section-title {
-        border-bottom: 2px solid var(--primary-color);
-        padding-bottom: 0.5rem;
-        margin-top: 2rem;
-    }
-    table {
-        border-collapse: collapse;
-        width: 100%;
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        margin-bottom: 2rem;
-    }
-    th, td {
-        padding: 12px;
-        border-bottom: 1px solid #ddd;
-        text-align: left;
-    }
-    th {
-        background-color: var(--secondary-color);
-        color: white;
-    }
-    tr:hover {
-        background-color: #f1f1f1;
-    }
-    .paid {
-        color: var(--success-color);
-        font-weight: bold;
-    }
-    .due {
-        color: var(--warning-color);
-        font-weight: bold;
-    }
-    .message-success {
-        color: var(--success-color);
-        font-weight: bold;
-        margin-bottom: 1rem;
-    }
-    .message-error {
-        color: var(--danger-color);
-        font-weight: bold;
-        margin-bottom: 1rem;
-    }
-    form.add-payment {
-        background: white;
-        padding: 1rem;
-        border-radius: 8px;
-        margin-top: 1rem;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        max-width: 400px;
-    }
-    form.add-payment label {
-        display: block;
-        margin-bottom: 0.5rem;
-        font-weight: bold;
-    }
-    form.add-payment input[type="number"],
-    form.add-payment input[type="date"],
-    form.add-payment select {
-        width: 100%;
-        padding: 6px 8px;
-        margin-bottom: 1rem;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-    }
-    form.add-payment button {
-        background: var(--primary-color);
-        color: white;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-</style>
+<link rel="stylesheet" href="rent_payment.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 </head>
 <body>
 
 <div class="dashboard">
-    <aside class="sidebar">
+   <div class="sidebar">
         <div class="sidebar-header">
             <h2><?= htmlspecialchars($tenant_name) ?></h2>
         </div>
         <ul class="nav-menu">
             <li><a href="tenant_dashboard.php"><i class="fas fa-home"></i> Dashboard</a></li>
-            <li><a href="rent_payments.php" class="active"><i class="fas fa-file-invoice-dollar"></i> Payment Tracking</a></li>
+            <li><a href="#" class="active"><i class="fas fa-file-invoice-dollar"></i> Rent Payments</a></li>
             <li><a href="maintenance.php"><i class="fas fa-tools"></i> Maintenance</a></li>
-            <li><a href="logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            <li><a href="../Main/index.php"><i class="fas fa-home"></i> Home</a></li>
         </ul>
-    </aside>
+    </div>
 
     <main>
         <h1>Rent Payment Tracking</h1>
@@ -295,7 +170,7 @@ foreach ($bookings as $booking) {
                             <td><?= htmlspecialchars($row['start_date']) ?> to <?= htmlspecialchars($row['end_date']) ?></td>
                             <td>$<?= number_format($row['total_rent'], 2) ?></td>
                             <td>$<?= number_format($row['rent_paid'], 2) ?></td>
-                            <td class="<?= $row['rent_due'] > 0 ? 'due' : 'paid' ?>">$<?= number_format($row['rent_due'], 2) ?></td>
+                            <td class="<?= $row['rent_due'] > 0 ? 'due' : 'paid' ?>">Rs<?= number_format($row['rent_due'], 2) ?></td>
                         </tr>
                         <?php endforeach; ?>
                     </tbody>

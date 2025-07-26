@@ -1,21 +1,73 @@
-<?php    
+<?php 
 session_start();
-require 'db.php'; // expects $conn = mysqli_connect(...);
+require 'db.php'; // expects $conn = mysqli_connect(...)
 
-// Fetch 3 random available properties (not booked) with all amenity details
-$sql = "SELECT id, title, location, price, image, rooms, bathroom, bhk, wifi, parking, laundry, furnished, air_conditioning, balcony FROM houses WHERE status = 'available' ORDER BY RAND() LIMIT 3";
-$result = mysqli_query($conn, $sql);
+// Get search filters
+$location = isset($_GET['location']) ? trim($_GET['location']) : '';
+$min_price = isset($_GET['min_price']) && is_numeric($_GET['min_price']) ? (float)$_GET['min_price'] : 0;
+$max_price = isset($_GET['max_price']) && is_numeric($_GET['max_price']) ? (float)$_GET['max_price'] : 0;
+
+// Check if any filter is applied
+$filtersApplied = ($location !== '' || $min_price > 0 || $max_price > 0);
+
+// Build WHERE clause
+$whereClauses = ["status = 'available'"];
+$params = [];
+$types = "";
+
+if ($location !== '') {
+    $whereClauses[] = "location LIKE ?";
+    $params[] = "%$location%";
+    $types .= "s";
+}
+
+if ($min_price > 0) {
+    $whereClauses[] = "price >= ?";
+    $params[] = $min_price;
+    $types .= "d";
+}
+
+if ($max_price > 0 && $max_price >= $min_price) {
+    $whereClauses[] = "price <= ?";
+    $params[] = $max_price;
+    $types .= "d";
+}
+
+$whereSQL = implode(" AND ", $whereClauses);
+
+// Prepare SQL based on filters
+if ($filtersApplied) {
+    // Show all matching houses when filters applied
+    $sql = "SELECT id, title, location, price, image, rooms, bathroom, bhk, wifi, parking, laundry, furnished, air_conditioning, balcony
+            FROM houses 
+            WHERE $whereSQL
+            ORDER BY created_at DESC";
+} else {
+    // Show 3 random featured houses if no filters
+    $sql = "SELECT id, title, location, price, image, rooms, bathroom, bhk, wifi, parking, laundry, furnished, air_conditioning, balcony
+            FROM houses 
+            WHERE $whereSQL
+            ORDER BY RAND()
+            LIMIT 3";
+}
+
+$stmt = $conn->prepare($sql);
+if ($params) {
+    $stmt->bind_param($types, ...$params);
+}
+
+$stmt->execute();
+$result = $stmt->get_result();
 
 $houses = [];
 if ($result) {
-    while ($row = mysqli_fetch_assoc($result)) {
+    while ($row = $result->fetch_assoc()) {
         $houses[] = $row;
     }
-    mysqli_free_result($result);
-} else {
-    // Query error handling (optional)
-    $houses = [];
+    $result->free();
 }
+
+$stmt->close();
 ?>
 
 <!DOCTYPE html>
@@ -36,11 +88,6 @@ if ($result) {
            </a>
         </div>
 
-        <!-- SEARCH MOVED HERE -->
-        <form action="browse.php" method="get" class="search-form" role="search" aria-label="Search houses">
-          <input type="text" name="search" placeholder="Search by location, title or price" required />
-          <button type="submit" aria-label="Search">Search</button>
-        </form>
 
         <div class="nav-links" role="navigation" aria-label="Main Navigation Links">
             <a href="#hero" tabindex="0">Home</a>
@@ -103,11 +150,22 @@ if ($result) {
         <div class="container hero-content">
             <h1>Find Your Perfect Home To Rent</h1>
             <p>Discover verified rental houses with ease. From cozy apartments to spacious homes — your dream rental is just a click away.</p>
-            <button class="btn-primary" type="button" aria-label="Browse house rentals" onclick="location.href='Browse.php'">
-                Browse Rentals
-            </button>
+              <!-- Optional: Search section below hero for visibility -->
+    <section class="search-section" aria-label="Filter rental houses">
+      <div class="container">
+        <h2>Find Rentals</h2>
+        <form action="browse.php" method="get" class="search-form" role="search" aria-label="Search houses">
+          <input type="text" name="location" placeholder="Location" value="<?= htmlspecialchars($location) ?>" />
+          <input type="number" name="min_price" placeholder="Min Rent" min="0" value="<?= $min_price > 0 ? (int)$min_price : '' ?>" />
+          <input type="number" name="max_price" placeholder="Max Rent" min="0" value="<?= $max_price > 0 ? (int)$max_price : '' ?>" />
+          <button type="submit" aria-label="Search">Search</button>
+        </form>
+      </div>
+    </section>
         </div>
     </section>
+    
+
 <section class="browse" aria-labelledby="browse-title" id="browse">  
   <div class="container">
     <h2 id="browse-title">Featured Properties</h2>
@@ -229,7 +287,7 @@ if ($result) {
                 <i class="fas fa-eye" aria-hidden="true"></i>
                 View Details
               </a>
-              <a href="Tenants/booking.php?id=<?= intval($house['id']) ?>" 
+              <a href="../Tenants/booking.php?id=<?= intval($house['id']) ?>" 
                  class="btn btn-contact btn-primary"
                  aria-label="Rent <?= htmlspecialchars($house['title'], ENT_QUOTES, 'UTF-8') ?> now">
                 <i class="fas fa-home" aria-hidden="true"></i>

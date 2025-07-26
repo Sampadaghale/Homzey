@@ -10,7 +10,7 @@
 
   <div class="signup-container">
     <section class="auth-card" aria-labelledby="signup-title">
-      <img src="image/house.png" alt="Homzey Logo" class="logo" />
+      <h2> Homzey</h2>
       <form action="signup_process.php" method="post" novalidate aria-label="Signup form">
         <label for="homepage-signup-name">Name</label>
         <input type="text" id="homepage-signup-name" name="name" placeholder="Your full name" required aria-required="true" />

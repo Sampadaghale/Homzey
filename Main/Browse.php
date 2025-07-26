@@ -1,32 +1,54 @@
-<?php    
+<?php 
 session_start();
-require 'db.php'; // $conn = mysqli connection
+require 'db.php'; // your DB connection
 
-$search = '';
-if (isset($_GET['search'])) {
-    $search = trim($_GET['search']);
+// Get filters from URL (same names as form inputs)
+$location = isset($_GET['location']) ? trim($_GET['location']) : '';
+$min_price = isset($_GET['min_price']) && is_numeric($_GET['min_price']) ? (float)$_GET['min_price'] : 0;
+$max_price = isset($_GET['max_price']) && is_numeric($_GET['max_price']) ? (float)$_GET['max_price'] : 0;
+
+// Build WHERE clauses for filtering
+$whereClauses = ["status IN ('available', 'booked')"];
+$params = [];
+$types = "";
+
+if ($location !== '') {
+    $whereClauses[] = "location LIKE ?";
+    $params[] = "%$location%";
+    $types .= "s";
 }
 
-if ($search !== '') {
-    $priceFilter = is_numeric($search) ? " OR price = " . floatval($search) : "";
-    $sql = "SELECT * FROM houses WHERE (title LIKE ? OR location LIKE ? $priceFilter) ORDER BY created_at DESC";
-    $stmt = $conn->prepare($sql);
-    $likeSearch = "%$search%";
-    $stmt->bind_param("ss", $likeSearch, $likeSearch);
-    $stmt->execute();
-    $result = $stmt->get_result();
-} else {
-    $sql = "SELECT * FROM houses ORDER BY created_at DESC";
-    $result = $conn->query($sql);
+if ($min_price > 0) {
+    $whereClauses[] = "price >= ?";
+    $params[] = $min_price;
+    $types .= "d";
 }
+
+if ($max_price > 0 && $max_price >= $min_price) {
+    $whereClauses[] = "price <= ?";
+    $params[] = $max_price;
+    $types .= "d";
+}
+
+$whereSQL = implode(" AND ", $whereClauses);
+
+$sql = "SELECT * FROM houses WHERE $whereSQL ORDER BY created_at DESC";
+
+$stmt = $conn->prepare($sql);
+
+if ($params) {
+    $stmt->bind_param($types, ...$params);
+}
+
+$stmt->execute();
+$result = $stmt->get_result();
 
 $houses = [];
-if ($result) {
-    while ($row = $result->fetch_assoc()) {
-        $houses[] = $row;
-    }
-    if (isset($stmt)) $stmt->close();
+while ($row = $result->fetch_assoc()) {
+    $houses[] = $row;
 }
+
+$stmt->close();
 ?>
 
 <!DOCTYPE html>
@@ -38,115 +60,7 @@ if ($result) {
 <link rel="stylesheet" href="styles.css" />
 <link rel="stylesheet" href="browse.css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-<style>
-  .browse {
-  margin-top: 0.5rem; 
-  padding-top: 0.5rem; 
-}
 
-
-main {
-  margin-top: 0;
-  padding-top: 0;
-}
-
-  .browse h1,
-.browse p {
-  text-align: center;
-  margin-top: 0;
-  padding-top: 0.5rem
-}
-
-  .badge-booked {
-    background-color: #ef4444;
-    color: white;
-    padding: 4px 8px;
-    border-radius: 5px;
-    font-size: 0.85rem;
-    font-weight: 700;
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    z-index: 2;
-  }
-  .property-card {
-    position: relative;
-    background: #fff;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  }
-
-  .slider {
-    position: relative;
-    overflow: hidden;
-    height: 200px;
-  }
-
-  .slider-images {
-    display: flex;
-    transition: transform 0.3s ease-in-out;
-  }
-
-  .slider img {
-    width: 100%;
-    flex-shrink: 0;
-    object-fit: cover;
-    height: 200px;
-  }
-
-  /* Dots container */
-  .slider-dots {
-    text-align: center;
-    position: absolute;
-    bottom: 8px;
-    width: 100%;
-  }
-
-  /* Each dot */
-  .slider-dot {
-  display: inline-block;
-  width: 8px;      /* smaller width */
-  height: 8px;     /* smaller height */
-  margin: 0 5px;
-  background-color: rgba(255, 255, 255, 0.6);
-  border-radius: 50%;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-
-  /* Active dot */
-  .slider-dot.active {
-    background-color: #3b82f6;
-  }
-
-  /* Remove background color on hover for dots */
-  .slider-dot:hover {
-    background-color: rgba(255, 255, 255, 0.8);
-  }
-
-  .browse-grid {
-  display: grid;
-  gap: 2rem;
-  padding: 2rem;
-  /* change this: */
-  grid-template-columns: repeat(auto-fit, minmax(300px, max-content));
-  justify-content: center; /* center the grid items horizontally */
-}
-
-
-  .btn-disabled {
-    background-color: #999;
-    cursor: not-allowed;
-    pointer-events: none;
-    color: #eee;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    text-align: center;
-    display: inline-block;
-  }
 </style>
 </head>
 <body>
@@ -157,11 +71,7 @@ main {
             <a href="index.php"><img src="../image/house.png" alt="Homzey logo" /></a>
         </div>
 
-        <form action="browse.php" method="get" class="search-form">
-            <input type="text" name="search" placeholder="Search by location, title or price" value="<?= htmlspecialchars($search); ?>" />
-            <button type="submit">Search</button>
-        </form>
-
+        
         <div class="nav-links">
             <a href="index.php">Home</a>
             <a href="browse.php">Browse</a>
@@ -208,11 +118,22 @@ main {
     </nav>
 </header>
 
-<main>
+<main> 
     <section class="browse" id="browse">
         <h1>Browse Our Rentals</h1>
-        <?php if ($search !== ''): ?>
-            <p>Search results for: <strong><?= htmlspecialchars($search); ?></strong></p>
+
+        <?php if ($location !== '' || $min_price > 0 || $max_price > 0): ?>
+            <p>Search results:
+                <?php if ($location !== ''): ?>
+                    <strong>Location: <?= htmlspecialchars($location); ?></strong>
+                <?php endif; ?>
+                <?php if ($min_price > 0): ?>
+                    <strong>Min Price: Rs<?= htmlspecialchars($min_price); ?></strong>
+                <?php endif; ?>
+                <?php if ($max_price > 0): ?>
+                    <strong>Max Price: Rs<?= htmlspecialchars($max_price); ?></strong>
+                <?php endif; ?>
+            </p>
         <?php endif; ?>
 
         <?php if (count($houses) > 0): ?>
@@ -261,6 +182,7 @@ main {
         <?php endif; ?>
     </section>
 </main>
+
 
 <footer>
     &copy; 2025 Homzey. All rights reserved.
